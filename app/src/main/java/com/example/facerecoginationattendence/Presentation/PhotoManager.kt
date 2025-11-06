@@ -46,7 +46,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PhotoManager (context : Context) : Bitmap?{
+fun PhotoManager (context : Context , OnDismiss: () -> Unit) : Bitmap?{
     var BottomSheetState = rememberModalBottomSheetState(
     )
     var a = context.checkSelfPermission(Manifest.permission.CAMERA)
@@ -71,8 +71,11 @@ fun PhotoManager (context : Context) : Bitmap?{
 
         }
         else{
-           // Toast.makeText(context,"No Image Selected",Toast.LENGTH_SHORT).show()
+            Toast.makeText(context,"No Image Selected",Toast.LENGTH_SHORT).show()
+            OnDismiss()
+
         }
+       // OnDismiss()
 
 
 
@@ -87,8 +90,10 @@ fun PhotoManager (context : Context) : Bitmap?{
         }
         else{
             Toast.makeText(context,"No Photo Captured",Toast.LENGTH_SHORT).show()
+            OnDismiss()
 
         }
+        //OnDismiss()
 
 
     }
@@ -98,6 +103,7 @@ fun PhotoManager (context : Context) : Bitmap?{
         }
         else{
             Toast.makeText(context,"Permission Denied",Toast.LENGTH_SHORT).show()
+            OnDismiss()
 
         }
     }
@@ -105,6 +111,7 @@ fun PhotoManager (context : Context) : Bitmap?{
     if(ShowBottomSheet.value == true){
         ModalBottomSheet(
            onDismissRequest = { ShowBottomSheet.value = false
+               OnDismiss()
            },
             //onDismissRequest = { ShowBottomSheet.value = true},
             sheetState = BottomSheetState

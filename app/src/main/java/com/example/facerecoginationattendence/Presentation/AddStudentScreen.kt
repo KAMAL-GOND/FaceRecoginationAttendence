@@ -46,10 +46,14 @@ fun AddStudentScreen(veiwModel: StudentSideVeiwModel){
     var rollNo by remember { mutableStateOf("") }
     var Class by remember { mutableStateOf("") }
 
+    fun OnDismiss(){
+        showPhotoManager = false
+    }
+
 
     if (showPhotoManager) {
 
-        val returnedBitmap = PhotoManager(context = context)
+        val returnedBitmap = PhotoManager(context = context, OnDismiss = {OnDismiss()})
 
 
         LaunchedEffect(returnedBitmap) {
@@ -73,6 +77,7 @@ fun AddStudentScreen(veiwModel: StudentSideVeiwModel){
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ) {
+        Spacer(modifier = Modifier.height(25.dp))
         Box(modifier = Modifier
             .size(150.dp)
             .clip(CircleShape)
