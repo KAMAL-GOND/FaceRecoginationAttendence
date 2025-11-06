@@ -1,5 +1,6 @@
 package com.example.facerecoginationattendence.Presentation
 
+import android.Manifest
 import android.Manifest.*
 import android.content.Context
 import android.content.pm.PackageManager
@@ -7,6 +8,7 @@ import android.graphics.Bitmap
 import android.graphics.Camera
 import android.net.Uri
 import android.provider.MediaStore
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -46,12 +48,15 @@ import kotlinx.coroutines.launch
 @Composable
 fun PhotoManager (context : Context) : Bitmap?{
     var BottomSheetState = rememberModalBottomSheetState(
-
     )
+    var a = context.checkSelfPermission(Manifest.permission.CAMERA)
+    var b = PackageManager.PERMISSION_GRANTED
+    Log.d("kamal",a.toString() + b.toString())
     var scope = rememberCoroutineScope()
 //    var a = BottomSheetState.show()
     var ShowBottomSheet = remember { mutableStateOf(true) }
     LaunchedEffect(Unit) {
+        ShowBottomSheet.value = true
 
     }
     var uri by remember{mutableStateOf<Uri?>(null) };
@@ -66,7 +71,7 @@ fun PhotoManager (context : Context) : Bitmap?{
 
         }
         else{
-            Toast.makeText(context,"No Image Selected",Toast.LENGTH_SHORT).show()
+           // Toast.makeText(context,"No Image Selected",Toast.LENGTH_SHORT).show()
         }
 
 
@@ -77,6 +82,7 @@ fun PhotoManager (context : Context) : Bitmap?{
     var CapturePhoto = rememberLauncherForActivityResult(contract = ActivityResultContracts.TakePicturePreview()){ it ->
         if (it != null){
             bitmap = it
+
 
         }
         else{
@@ -92,12 +98,15 @@ fun PhotoManager (context : Context) : Bitmap?{
         }
         else{
             Toast.makeText(context,"Permission Denied",Toast.LENGTH_SHORT).show()
+
         }
     }
 
     if(ShowBottomSheet.value == true){
         ModalBottomSheet(
-            onDismissRequest = { ShowBottomSheet.value = false },
+           onDismissRequest = { ShowBottomSheet.value = false
+           },
+            //onDismissRequest = { ShowBottomSheet.value = true},
             sheetState = BottomSheetState
         ) {
             Column (
