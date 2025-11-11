@@ -1,5 +1,6 @@
 package com.example.facerecoginationattendence.Presentation
 
+
 import android.graphics.Bitmap
 import android.widget.Toast
 import androidx.compose.foundation.Image
@@ -30,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -38,7 +40,7 @@ import com.example.facerecoginationattendence.Domain.Models.Students
 import com.example.facerecoginationattendence.Domain.StudentSideVeiwModel
 
 @Composable
-fun AddStudentScreen(veiwModel: StudentSideVeiwModel){
+fun MarkAttendenceScreen(veiwModel: StudentSideVeiwModel){
     val imageBitmapState = remember { mutableStateOf<Bitmap?>(null) }
     val context = LocalContext.current
     var showPhotoManager by remember { mutableStateOf(false) }
@@ -80,8 +82,8 @@ fun AddStudentScreen(veiwModel: StudentSideVeiwModel){
         Spacer(modifier = Modifier.height(25.dp))
         Box(modifier = Modifier
             .size(150.dp)
-            .clip(CircleShape)
-            .border(2.dp, Color.Gray, CircleShape)
+            .clip(RectangleShape)
+            .border(2.dp, Color.Gray, RectangleShape)
             .clickable {
 
                 showPhotoManager = true
@@ -105,15 +107,15 @@ fun AddStudentScreen(veiwModel: StudentSideVeiwModel){
 
             }
         }
-        Spacer(modifier = Modifier.height(16.dp))
-        OutlinedTextField(value = name, onValueChange = {name = it}, label = { Text(text = "Student Name")})
-        Spacer(modifier = Modifier.height(16.dp))
-        OutlinedTextField(value = rollNo, onValueChange = {rollNo = it}, label = { Text(text = "Roll No")})
+//        Spacer(modifier = Modifier.height(16.dp))
+//        OutlinedTextField(value = name, onValueChange = {name = it}, label = { Text(text = "Student Name")})
+//        Spacer(modifier = Modifier.height(16.dp))
+//        OutlinedTextField(value = rollNo, onValueChange = {rollNo = it}, label = { Text(text = "Roll No")})
         Spacer(modifier = Modifier.height(16.dp))
         OutlinedTextField(value = Class, onValueChange = {Class = it}, label = { Text(text = "Class")})
 
-        if(name.isNotEmpty() && rollNo.isNotEmpty() && Class.isNotEmpty() && imageBitmapState.value != null){
-            Button(onClick = {veiwModel.AddStudent(Students(name = name,rollNo = rollNo,Class = Class, imageBitmap = imageBitmapState.value))  }) {
+        if( Class.isNotEmpty() && imageBitmapState.value != null){
+            Button(onClick = {veiwModel.MarkAttendence(Class = Class, image = imageBitmapState.value!! )}) {
                 Text(text = "Add Student")
             }
         }
