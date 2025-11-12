@@ -44,11 +44,13 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import kotlinx.coroutines.launch
 
+var xyz = "panner"
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PhotoManager (context : Context , OnDismiss: () -> Unit) : Bitmap?{
     var BottomSheetState = rememberModalBottomSheetState(
     )
+
     var a = context.checkSelfPermission(Manifest.permission.CAMERA)
     var b = PackageManager.PERMISSION_GRANTED
     Log.d("kamal",a.toString() + b.toString())
