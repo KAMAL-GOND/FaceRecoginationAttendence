@@ -24,6 +24,7 @@ object ML_Kit_Face_Detection {
                     Faces.maxByOrNull { it.boundingBox.height() * it.boundingBox.height() }
                 mainFace?.let { face ->
                     val box = face.boundingBox
+                    Log.d("AddStudentMLKItdetection", box.toString())
                     val croppedFace = Bitmap.createBitmap(
                         BitMap,
                         box.left.coerceAtLeast(0),
@@ -42,7 +43,10 @@ object ML_Kit_Face_Detection {
         }.addOnFailureListener { a ->
             Log.d("AddStudentMLKItdetection", a.toString())
         }
-       return BitMap!!
+
+        Log.d("AddStudentMLKItdetection", CroppedImage.toString())
+
+       return CroppedImage!!
     }
     fun cropFaceFromBitmap(source: Bitmap, box: Rect): Bitmap {
         val left = box.left.coerceAtLeast(0)
@@ -52,7 +56,7 @@ object ML_Kit_Face_Detection {
         return Bitmap.createBitmap(source, left, top, width, height)
     }
 
-    fun MarkAttendence(BitMap: Bitmap , rotation: Int){
+    fun MarkAttendence(BitMap: Bitmap , rotation: Int):ArrayList<Bitmap>?{
         var Faces : ArrayList<Bitmap>?=null
 
         var imputImage = InputImage.fromBitmap(BitMap,rotation)
@@ -71,5 +75,6 @@ object ML_Kit_Face_Detection {
         }.addOnFailureListener {
             Log.d("MarkAttendenceMlkit",it.toString())
         }
+        return Faces!!
     }
 }

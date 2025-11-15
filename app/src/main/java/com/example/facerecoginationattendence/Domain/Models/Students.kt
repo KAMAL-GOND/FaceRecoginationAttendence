@@ -10,6 +10,6 @@ data class Students(
 //    var department : String? = null,
 //    var semester : String? = null,
     var Class : String? = null,
-    var PhotoEmbedding : String ?= null,
+    var PhotoEmbedding : FloatArray ?= null,
     var imageBitmap: Bitmap? = null
 )

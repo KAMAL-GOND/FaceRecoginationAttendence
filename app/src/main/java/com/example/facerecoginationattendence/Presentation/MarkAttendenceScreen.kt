@@ -2,7 +2,9 @@ package com.example.facerecoginationattendence.Presentation
 
 
 import android.graphics.Bitmap
+import android.os.Build
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -39,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import com.example.facerecoginationattendence.Domain.Models.Students
 import com.example.facerecoginationattendence.Domain.StudentSideVeiwModel
 
+@RequiresApi(Build.VERSION_CODES.R)
 @Composable
 fun MarkAttendenceScreen(veiwModel: StudentSideVeiwModel){
     val imageBitmapState = remember { mutableStateOf<Bitmap?>(null) }
@@ -55,7 +58,7 @@ fun MarkAttendenceScreen(veiwModel: StudentSideVeiwModel){
 
     if (showPhotoManager) {
 
-        val returnedBitmap = PhotoManager(context = context, OnDismiss = {OnDismiss()})
+        val returnedBitmap = PhotoManager(context = context, OnDismiss = {OnDismiss()},veiwModel.appLicationcontext)
 
 
         LaunchedEffect(returnedBitmap) {
