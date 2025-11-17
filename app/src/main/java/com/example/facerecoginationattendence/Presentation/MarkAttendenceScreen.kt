@@ -119,7 +119,7 @@ fun MarkAttendenceScreen(veiwModel: StudentSideVeiwModel){
 
         if( Class.isNotEmpty() && imageBitmapState.value != null){
             Button(onClick = {veiwModel.MarkAttendence(Class = Class, image = imageBitmapState.value!! )}) {
-                Text(text = "Add Student")
+                Text(text = "Mark Attendence")
             }
         }
 

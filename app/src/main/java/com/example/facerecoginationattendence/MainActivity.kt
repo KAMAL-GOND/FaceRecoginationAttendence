@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.facerecoginationattendence.Domain.StudentSideVeiwModel
 import com.example.facerecoginationattendence.Presentation.AddStudentScreen
+import com.example.facerecoginationattendence.Presentation.MarkAttendenceScreen
 import com.example.facerecoginationattendence.ui.theme.FaceRecoginationAttendenceTheme
 
 class MainActivity : ComponentActivity() {
@@ -28,6 +29,7 @@ class MainActivity : ComponentActivity() {
         setContent {
 
             AddStudentScreen(veiwModel)
+            //MarkAttendenceScreen(veiwModel)
 //            FaceRecoginationAttendenceTheme {
 //                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
 //                    Greeting(

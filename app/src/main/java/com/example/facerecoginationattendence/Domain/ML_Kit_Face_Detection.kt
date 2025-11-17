@@ -22,6 +22,8 @@ object ML_Kit_Face_Detection {
     val detector = FaceDetection.getClient(Option)
 
 
+
+
     fun AddStudent(BitMap: Bitmap,rotation:Int) : Flow<Result<Bitmap>> = callbackFlow{
         //trySend(Result.)
         Log.d("mlKitLogs","1 entry bitmap data is" + BitMap.toString())
@@ -68,24 +70,25 @@ object ML_Kit_Face_Detection {
 
        //return CroppedImage
     }
-    fun cropFaceFromBitmap(source: Bitmap, box: Rect): Bitmap {
-        val left = box.left.coerceAtLeast(0)
-        val top = box.top.coerceAtLeast(0)
-        val width = box.width().coerceAtMost(source.width - left)
-        val height = box.height().coerceAtMost(source.height - top)
-        return Bitmap.createBitmap(source, left, top, width, height)
-    }
+
 
     fun MarkAttendence(BitMap: Bitmap , rotation: Int):Flow<Result<ArrayList<Bitmap>?>> = callbackFlow{
-        var Faces : ArrayList<Bitmap>?=null
+        var Faces : ArrayList<Bitmap>
 
         var imputImage = InputImage.fromBitmap(BitMap,rotation)
+        Log.d("MarkAttendenceMlkit",imputImage.toString())
         detector.process(imputImage).addOnSuccessListener{
+            Log.d("MarkAttendenceMlkit",it.toString())
+
+
             if(it != null){
+                 Faces = ArrayList()
                 for(face in it){
                     var croppedImage = cropFaceFromBitmap(BitMap , face.boundingBox)
-                    Faces?.add(croppedImage)
+                    Log.d("MarkAttendenceMlkit",croppedImage.toString())
+                    Faces.add(croppedImage)
                 }
+                Log.d("MarkAttendenceMlkit",Faces.toString())
                 trySend(Result.success(Faces))
             }
 
@@ -99,5 +102,14 @@ object ML_Kit_Face_Detection {
             trySend(Result.failure<ArrayList<Bitmap>?>(it))
         }
         awaitClose{close()}
+    }
+    fun cropFaceFromBitmap(source: Bitmap, box: Rect): Bitmap {
+        val left = box.left.coerceAtLeast(0)
+        val top = box.top.coerceAtLeast(0)
+        val width = box.width().coerceAtMost(source.width - left)
+        val height = box.height().coerceAtMost(source.height - top)
+        Log.d("MarkAttendenceMlkit","cropFaceFromBitmap"+box.toString())
+
+        return Bitmap.createBitmap(source, left, top, width, height)
     }
 }

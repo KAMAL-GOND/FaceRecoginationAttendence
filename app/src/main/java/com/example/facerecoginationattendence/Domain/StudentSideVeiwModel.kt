@@ -36,7 +36,37 @@ class StudentSideVeiwModel(appLicationcontext: Context) : ViewModel() {
         //Student.PhotoEmbedding = getEmbeddingFromBitmap(Student.imageBitmap!!, interpreter)
         //Log.d("photoembediing",croppedImage.toString())
     }
-    fun MarkAttendence(Class:String , image : Bitmap){}
+    fun MarkAttendence(Class:String , image : Bitmap)= viewModelScope.launch() {
+        var embeddings : ArrayList<String>
+        ML_Kit_Face_Detection.MarkAttendence(image,0).collect{
+            if(it.isSuccess){
+                Log.d("MarkAttendence",it.getOrNull().toString())
+
+                var BitMapArray = it.getOrNull()
+                if (BitMapArray != null){
+                    embeddings = ArrayList()
+                    for(bitmap in BitMapArray){
+                        var embedding = getEmbeddingFromBitmap(bitmap,interpreter)
+                        embeddings?.add(embedding.joinToString (","))
+
+
+                    }
+                    Log.d("MarkAttendenceaa",embeddings.toString())
+
+
+                }
+                else{
+                    Log.d("MarkAttendence","BitMapArray is null")
+
+                }
+            }
+            else{
+                Log.d("MarkAttendence","no success"+it.exceptionOrNull().toString())
+
+            }
+
+        }
+    }
 
 
 
