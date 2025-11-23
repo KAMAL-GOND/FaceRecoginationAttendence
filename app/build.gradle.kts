@@ -57,8 +57,13 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    implementation("com.google.mlkit:face-detection:16.1.7")
+    // Exclude the conflicting TFLite API from the ML Kit dependency
+    implementation("com.google.mlkit:face-detection:16.1.7") {
+        exclude(group = "com.google.ai.edge", module = "litert-api")
+    }
     implementation("org.tensorflow:tensorflow-lite:2.12.0")
+    // Use the correct TFLite Support library for image processing
+    implementation("org.tensorflow:tensorflow-lite-support:0.4.3")
     implementation(libs.androidx.appcompat)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

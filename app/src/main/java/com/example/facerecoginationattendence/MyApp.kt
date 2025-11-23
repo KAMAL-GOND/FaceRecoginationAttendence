@@ -10,7 +10,7 @@ class MyApp : Application() {
 
     companion object {
         lateinit var interpreter: Interpreter
-        private const val MODEL_NAME = "mobile_face_net.tflite"
+        private const val MODEL_NAME = "facenet_int_quantized.tflite"
     }
 
     override fun onCreate() {
