@@ -43,12 +43,12 @@ import com.example.facerecoginationattendence.Domain.StudentSideVeiwModel
 
 @RequiresApi(Build.VERSION_CODES.R)
 @Composable
+// MARK ATTENDENCE SCREEN
 fun MarkAttendenceScreen(veiwModel: StudentSideVeiwModel){
     val imageBitmapState = remember { mutableStateOf<Bitmap?>(null) }
     val context = LocalContext.current
     var showPhotoManager by remember { mutableStateOf(false) }
-    var name by remember { mutableStateOf("") }
-    var rollNo by remember { mutableStateOf("") }
+
     var Class by remember { mutableStateOf("") }
 
     fun OnDismiss(){

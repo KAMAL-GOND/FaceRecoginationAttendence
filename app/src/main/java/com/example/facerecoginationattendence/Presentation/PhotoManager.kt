@@ -56,6 +56,7 @@ var xyz = "panner"
 @RequiresApi(Build.VERSION_CODES.R)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+// SINGLE PHOTO MANAGER FOR BOTH SCREEN
 fun PhotoManager (context : Context , OnDismiss: () -> Unit , applicationContext: Context) : Bitmap?{
     var BottomSheetState = rememberModalBottomSheetState(
     )
@@ -73,11 +74,12 @@ fun PhotoManager (context : Context , OnDismiss: () -> Unit , applicationContext
     var uri by remember{mutableStateOf<Uri?>(null) };
     var bitmap by remember { mutableStateOf<Bitmap?>(null) }
 
-
+   // TO PICK PHOTO FROM GALLERY
     var PickPhoto = rememberLauncherForActivityResult(contract = ActivityResultContracts.PickVisualMedia()){ it->
         if (it != null){
             uri = it;
             bitmap = MediaStore.Images.Media.getBitmap(context.contentResolver,it)
+            // TO GET ROTATION FROM EXIF ROTATION TO PASS VERTICALLY IMAGE FURTHER
             rotation = getRotationFromExif(it,context)
            // bitmap = MediaStore.Images.Media.getBitmap()
 
@@ -93,10 +95,11 @@ fun PhotoManager (context : Context , OnDismiss: () -> Unit , applicationContext
 
         }
 
-
+    // TO CAPTURE PHOTO SINGELY FROM CAMERA
     var CapturePhoto = rememberLauncherForActivityResult(contract = ActivityResultContracts.TakePicturePreview()){ it ->
         if (it != null){
             bitmap = it
+            // TO GET ROTATION FROM DEVICE ROTATION TO PASS VERTICALLY IMAGE FURTHER
             rotation = when (applicationContext.display?.rotation) {
                 Surface.ROTATION_0 -> 0
                 Surface.ROTATION_90 -> 90
@@ -116,6 +119,7 @@ fun PhotoManager (context : Context , OnDismiss: () -> Unit , applicationContext
 
 
     }
+    // TO ASK PERMISSION TO USE CAMERA
     var permission = rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission()) {
         if (it){
             CapturePhoto.launch()
@@ -126,7 +130,7 @@ fun PhotoManager (context : Context , OnDismiss: () -> Unit , applicationContext
 
         }
     }
-
+    // BOTTOM SHEET APPERANCE TO PICK PHOTO FROM GALLERY OR CAMERA
     if(ShowBottomSheet.value == true){
         ModalBottomSheet(
            onDismissRequest = { ShowBottomSheet.value = false
@@ -207,10 +211,12 @@ fun PhotoManager (context : Context , OnDismiss: () -> Unit , applicationContext
 
 
 }
+//TO ROTATE IMAGE VERTICAL;LY
 fun rotateBitmap(bitmap: Bitmap?, rotationDegrees: Int?): Bitmap? {
     val matrix = Matrix().apply { postRotate(rotationDegrees!!.toFloat()) }
     return Bitmap.createBitmap(bitmap!!, 0, 0, bitmap.width, bitmap.height, matrix, true)
 }
+//TO GET ROTATION FROM EXIF OF URI
 fun getRotationFromExif(uri: Uri, context: Context): Int {
     val inputStream = context.contentResolver.openInputStream(uri)
     val exif = ExifInterface(inputStream!!)
