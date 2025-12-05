@@ -62,7 +62,7 @@ dependencies {
         exclude(group = "com.google.ai.edge", module = "litert-api")
     }
     implementation("org.tensorflow:tensorflow-lite:2.12.0")
-    // Use the correct TFLite Support library for image processing
+
     implementation("org.tensorflow:tensorflow-lite-support:0.4.3")
     implementation(libs.androidx.appcompat)
     testImplementation(libs.junit)

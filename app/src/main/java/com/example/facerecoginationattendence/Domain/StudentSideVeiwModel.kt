@@ -9,12 +9,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.facerecoginationattendence.Domain.Models.Students
 import com.example.facerecoginationattendence.MyApp
+import getEmbeddingFromBitmap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.tensorflow.lite.Interpreter
 import java.io.FileInputStream
 import java.nio.MappedByteBuffer
 import java.nio.channels.FileChannel
+import kotlin.jvm.optionals.getOrNull
 
 class StudentSideVeiwModel(appLicationcontext: Context) : ViewModel() {
 
@@ -24,21 +26,46 @@ class StudentSideVeiwModel(appLicationcontext: Context) : ViewModel() {
     val interpreter = MyApp.interpreter
 
 
-    fun AddStudent(Student : Students ) = viewModelScope.launch(){
-         ML_Kit_Face_Detection.AddStudent(Student.imageBitmap!!,0).collect {
-             if(it.isSuccess){
-                 var croppedImage = it.getOrNull()
-                 var embedding= getEmbeddingFromBitmap(croppedImage!!,interpreter)
-                 Log.d("photoembediing",embedding.joinToString(","))
+//    fun AddStudent(Student : Students ) = viewModelScope.launch(){
+//         face_detector(appLicationcontext,Student.imageBitmap!!,).collect {
+//             if(it.isSuccess){
+//                 var croppedImage = it.getOrNull()
+//                 var embedding= getEmbeddingFromBitmap(croppedImage!!,interpreter)
+//                 Log.d("photoembediing",embedding.joinToString(","))
+//
+//             }
+//        }
+//        //Student.PhotoEmbedding = getEmbeddingFromBitmap(Student.imageBitmap!!, interpreter)
+//        //Log.d("photoembediing",croppedImage.toString())
+//    }
+    fun AddStudent(student: Students) = viewModelScope.launch(Dispatchers.IO) {
+        student.imageBitmap?.let { bitmap ->
+            // Call face_detector which returns a Flow, and collect the result.
+            // No callback is needed here.
+            Single_face_detector(appLicationcontext, bitmap.copy(Bitmap.Config.ARGB_8888, true)).collect { result ->
+                if (result.isSuccess) {
+                    val croppedImage = result.getOrNull()
+                    if (croppedImage != null) {
+                        // Successfully cropped a face, now generate the embedding.
+                        val embedding = getEmbeddingFromBitmap(croppedImage, interpreter)
+                        val embeddingString = embedding.joinToString(",")
 
-             }
-        }
-        //Student.PhotoEmbedding = getEmbeddingFromBitmap(Student.imageBitmap!!, interpreter)
-        //Log.d("photoembediing",croppedImage.toString())
+                        // Assign the generated embedding back to the student object.
+                        student.PhotoEmbedding = embedding
+
+                        Log.d("AddStudent", "Successfully generated embedding: $embeddingString")
+                    } else {
+                        Log.d("AddStudent", "Face detection ran, but no face was found in the image.")
+                    }
+                } else {
+                    Log.e("AddStudent", "Face detection failed.", result.exceptionOrNull())
+                }
+            }
+        } ?: Log.e("AddStudent", "Student imageBitmap is null, cannot add student.")
     }
     fun MarkAttendence(Class:String , image : Bitmap)= viewModelScope.launch() {
         var embeddings : ArrayList<String>
-        ML_Kit_Face_Detection.MarkAttendence(image,0).collect{
+        Multiple_face_detector(appLicationcontext,image).collect{
             if(it.isSuccess){
                 Log.d("MarkAttendence",it.getOrNull().toString())
 
@@ -47,6 +74,7 @@ class StudentSideVeiwModel(appLicationcontext: Context) : ViewModel() {
                     embeddings = ArrayList()
                     for(bitmap in BitMapArray){
                         var embedding = getEmbeddingFromBitmap(bitmap,interpreter)
+                        Log.d("MarkAttendence",embedding.joinToString(","))
                         embeddings?.add(embedding.joinToString (","))
 
 

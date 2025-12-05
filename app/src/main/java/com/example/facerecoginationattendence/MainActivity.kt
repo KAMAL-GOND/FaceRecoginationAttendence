@@ -28,8 +28,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
 
-            AddStudentScreen(veiwModel)
-            //MarkAttendenceScreen(veiwModel)
+            //AddStudentScreen(veiwModel)
+            MarkAttendenceScreen(veiwModel)
 //            FaceRecoginationAttendenceTheme {
 //                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
 //                    Greeting(

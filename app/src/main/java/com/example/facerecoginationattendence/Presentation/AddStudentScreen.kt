@@ -50,6 +50,7 @@ fun AddStudentScreen(veiwModel: StudentSideVeiwModel){
     var rollNo by remember { mutableStateOf("") }
     var Class by remember { mutableStateOf("") }
     // FUNCTION TO PASS FOR MAKING SHOW POHTOTO MANAGER TRUE SO THAT AGAIN , IT DONT REMAIN TRUE WHEN  BOTTOM SHEET IS CLOSSE , FOR MAKING NEXT ATTEMPT TO SHOW PHOTO MANAGER
+
     fun OnDismiss(){
         showPhotoManager = false
     }

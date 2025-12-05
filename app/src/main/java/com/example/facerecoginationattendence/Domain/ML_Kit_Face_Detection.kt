@@ -1,115 +1,137 @@
 package com.example.facerecoginationattendence.Domain
 
+import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.Rect
+import android.graphics.Matrix
 import android.util.Log
 import com.google.mlkit.vision.common.InputImage
+import com.google.mlkit.vision.face.Face
 import com.google.mlkit.vision.face.FaceDetection
 import com.google.mlkit.vision.face.FaceDetectorOptions
+import com.google.mlkit.vision.face.FaceLandmark
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import org.tensorflow.lite.Interpreter
+import org.tensorflow.lite.support.common.ops.NormalizeOp
+import org.tensorflow.lite.support.image.ImageProcessor
+import org.tensorflow.lite.support.image.TensorImage
+import org.tensorflow.lite.support.image.ops.ResizeOp
 
-object ML_Kit_Face_Detection {
+// Rewritten to use Flow for modern, asynchronous handling.
+fun Single_face_detector(context: Context, image: Bitmap): Flow<Result<Bitmap?>> = callbackFlow {
+    val highAccuracyOpts = FaceDetectorOptions.Builder()
+        .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_ACCURATE)
+        .setLandmarkMode(FaceDetectorOptions.LANDMARK_MODE_ALL)
+        .setClassificationMode(FaceDetectorOptions.CONTOUR_MODE_NONE)
+        .build()
 
+    val detector = FaceDetection.getClient(highAccuracyOpts)
+    val inputImage = InputImage.fromBitmap(image, 0)
 
-
-    var Option = FaceDetectorOptions.Builder().setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_ACCURATE)
-        .setLandmarkMode(FaceDetectorOptions.LANDMARK_MODE_NONE).enableTracking().build()
-
-
-
-    val detector = FaceDetection.getClient(Option)
-
-
-
-
-    fun AddStudent(BitMap: Bitmap,rotation:Int) : Flow<Result<Bitmap>> = callbackFlow{
-        //trySend(Result.)
-        Log.d("mlKitLogs","1 entry bitmap data is" + BitMap.toString())
-        //var CroppedImage: Bitmap? = null
-        var image = InputImage.fromBitmap(BitMap, rotation)
-        Log.d("mlKitLogs","2 InputImage data is" + image.toString() )
-
-        detector.process(image).addOnSuccessListener { Faces ->
-            Log.d("mlKitLogs", "3 face data is"+Faces.toString())
-            if (Faces != null) {
-
-                var mainFace =
-                    Faces.maxByOrNull { it.boundingBox.height() * it.boundingBox.height() }
-                Log.d("mlKitLogs", "4 main face is"+mainFace.toString())
-                mainFace?.let { face ->
-                    val box = face.boundingBox
-                    Log.d("mlKitLogs", "5 box is"+box.toString())
-                    val croppedFace = Bitmap.createBitmap(
-                        BitMap,
-                        box.left.coerceAtLeast(0),
-                        box.top.coerceAtLeast(0),
-                        box.width().coerceAtMost(BitMap.width - box.left),
-                        box.height().coerceAtMost(BitMap.height - box.top)
-                    )
-                    Log.d("mlKitLogs", "6 cropped face is"+croppedFace.toString())
-                    trySend(Result.success(croppedFace))
-
-                    //CroppedImage = croppedFace
-
-                }
-
-
+    detector.process(inputImage)
+        .addOnSuccessListener { faces ->
+            if (faces.isNotEmpty()) {
+                // Face found, crop it and send the successful result.
+                var mainFace = faces.maxByOrNull { it.boundingBox.height() * it.boundingBox.width() }
+                val croppedFace = alignAndCropFace(image, mainFace!!)
+                trySend(Result.success(croppedFace))
             } else {
-                trySend(Result.failure<Bitmap>(Exception("No faces detected")))
-                Log.d("mlKitLogs", "7 no face")
+                // No face found, send a successful result with null.
+                trySend(Result.success(null))
             }
-        }.addOnFailureListener { a ->
-            Log.d("mlKitLogs", "8"+a.toString())
-            Result.failure<Bitmap>(a)
+            close() // Close the flow after sending the result.
         }
-        awaitClose {  close()}
-
-        //Log.d("mlKitLogs", "9"+CroppedImage.toString())
-
-       //return CroppedImage
-    }
-
-
-    fun MarkAttendence(BitMap: Bitmap , rotation: Int):Flow<Result<ArrayList<Bitmap>?>> = callbackFlow{
-        var Faces : ArrayList<Bitmap>
-
-        var imputImage = InputImage.fromBitmap(BitMap,rotation)
-        Log.d("MarkAttendenceMlkit",imputImage.toString())
-        detector.process(imputImage).addOnSuccessListener{
-            Log.d("MarkAttendenceMlkit",it.toString())
-
-
-            if(it != null){
-                 Faces = ArrayList()
-                for(face in it){
-                    var croppedImage = cropFaceFromBitmap(BitMap , face.boundingBox)
-                    Log.d("MarkAttendenceMlkit",croppedImage.toString())
-                    Faces.add(croppedImage)
-                }
-                Log.d("MarkAttendenceMlkit",Faces.toString())
-                trySend(Result.success(Faces))
-            }
-
-            else {
-                Log.d("MarkAttendenceMlkit","no faces there")
-                trySend(Result.failure<ArrayList<Bitmap>?>(Exception("No faces detected")))
-            }
-
-        }.addOnFailureListener {
-            Log.d("MarkAttendenceMlkit",it.toString())
-            trySend(Result.failure<ArrayList<Bitmap>?>(it))
+        .addOnFailureListener { e ->
+            // An error occurred, send a failure result.
+            trySend(Result.failure(e))
+            close() // Close the flow on failure.
         }
-        awaitClose{close()}
-    }
-    fun cropFaceFromBitmap(source: Bitmap, box: Rect): Bitmap {
-        val left = box.left.coerceAtLeast(0)
-        val top = box.top.coerceAtLeast(0)
-        val width = box.width().coerceAtMost(source.width - left)
-        val height = box.height().coerceAtMost(source.height - top)
-        Log.d("MarkAttendenceMlkit","cropFaceFromBitmap"+box.toString())
 
-        return Bitmap.createBitmap(source, left, top, width, height)
-    }
+    // This will be called when the flow is cancelled.
+    awaitClose { detector.close() }
 }
+
+// Simplified to be a synchronous function.
+fun crop_face(image: Bitmap, face: Face): Bitmap {
+    return Bitmap.createBitmap(
+        image,
+        face.boundingBox.left,
+        face.boundingBox.top,
+        face.boundingBox.width(),
+        face.boundingBox.height()
+    )
+}
+
+
+fun alignAndCropFace(original: Bitmap, face: Face, margin: Int = 10): Bitmap {
+    // 1. Get landmarks (eyes)
+    val leftEye = face.getLandmark(FaceLandmark.LEFT_EYE)?.position
+    val rightEye = face.getLandmark(FaceLandmark.RIGHT_EYE)?.position
+
+    if (leftEye == null || rightEye == null) {
+        // No landmark → return simple crop
+        return crop_face(original, face)
+    }
+
+    // 2. Calculate rotation angle based on eye positions
+    val dx = (rightEye.x - leftEye.x).toDouble()
+    val dy = (rightEye.y - leftEye.y).toDouble()
+    val angle = Math.toDegrees(Math.atan2(dy, dx)).toFloat()
+
+    // 3. Rotate the entire bitmap around the center
+    val matrix = Matrix()
+    matrix.postRotate(angle, original.width / 2f, original.height / 2f)
+    val rotated = Bitmap.createBitmap(original, 0, 0, original.width, original.height, matrix, true)
+
+    // 4. Rotate bounding box → approximate (simple + works well)
+    val rotatedBox = face.boundingBox
+
+    // 5. Add margin
+    val x = (rotatedBox.left - margin).coerceAtLeast(0)
+    val y = (rotatedBox.top - margin).coerceAtLeast(0)
+    val w = (rotatedBox.width() + 2 * margin).coerceAtMost(rotated.width - x)
+    val h = (rotatedBox.height() + 2 * margin).coerceAtMost(rotated.height - y)
+
+    // 6. Final crop
+    return Bitmap.createBitmap(rotated, x, y, w, h)
+}
+fun Multiple_face_detector(context: Context, image: Bitmap): Flow<Result<ArrayList<Bitmap>?>> = callbackFlow {
+    val highAccuracyOpts = FaceDetectorOptions.Builder()
+        .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_ACCURATE)
+        .setLandmarkMode(FaceDetectorOptions.LANDMARK_MODE_ALL)
+        .setClassificationMode(FaceDetectorOptions.CONTOUR_MODE_NONE)
+        .build()
+
+    val detector = FaceDetection.getClient(highAccuracyOpts)
+    val inputImage = InputImage.fromBitmap(image, 0)
+    var FaceList : ArrayList<Bitmap>
+
+    detector.process(inputImage)
+        .addOnSuccessListener { faces ->
+            if (faces.isNotEmpty()) {
+                FaceList  = ArrayList()
+                // Face found, crop it and send the successful result.
+                for(face in faces){
+                    val croppedFace = alignAndCropFace(image, face)
+                    FaceList.add(croppedFace)
+                    Log.d("EachFace",croppedFace.toString())
+                }
+                //val croppedFace = alignAndCropFace(image, face)
+                trySend(Result.success(FaceList))
+            } else {
+                // No face found, send a successful result with null.
+                trySend(Result.success(null))
+            }
+            close() // Close the flow after sending the result.
+        }
+        .addOnFailureListener { e ->
+            // An error occurred, send a failure result.
+            trySend(Result.failure(e))
+            close() // Close the flow on failure.
+        }
+
+    // This will be called when the flow is cancelled.
+    awaitClose { detector.close() }
+}
+
