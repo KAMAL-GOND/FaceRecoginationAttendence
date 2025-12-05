@@ -4,7 +4,7 @@ import android.graphics.Bitmap
 import androidx.compose.ui.graphics.ImageBitmap
 
 data class Students(
-    var id : String? = null,
+    var StudentID : Long? = null,
     var name : String? = null,
     var rollNo : String? = null,
 //    var department : String? = null,

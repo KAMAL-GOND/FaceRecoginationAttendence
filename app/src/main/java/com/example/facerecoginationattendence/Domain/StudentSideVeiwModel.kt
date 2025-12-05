@@ -7,6 +7,7 @@ import android.util.Log
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.facerecoginationattendence.Data.LocalDatabase.AppDatabase
 import com.example.facerecoginationattendence.Domain.Models.Students
 import com.example.facerecoginationattendence.MyApp
 import getEmbeddingFromBitmap
@@ -21,6 +22,8 @@ import kotlin.jvm.optionals.getOrNull
 class StudentSideVeiwModel(appLicationcontext: Context) : ViewModel() {
 
     var appLicationcontext = appLicationcontext
+
+    var db = AppDatabase.getDatabase(appLicationcontext)
 
 
     val interpreter = MyApp.interpreter
