@@ -9,22 +9,23 @@ import androidx.room.TypeConverter
 import androidx.room.TypeConverters
 
 @Entity
-data class StudentTable(
+data class Students(
     @PrimaryKey(autoGenerate = true) val StudentID: Long,
-    val name: String,
-    val rollNo: String,
-    val Class: String,
+    var name: String?,
+    //var rollNo: Int ?,
+    var Class: String?,
+
 
     @TypeConverters(FloatArrayConvertor ::class)
-    val PhotoEmbedding: FloatArray,
+    var PhotoEmbedding: FloatArray? = null,
     @Ignore
     var imageBitmap: Bitmap? = null
 )
 
 @Entity
-data class ClassTable(
-    @PrimaryKey(autoGenerate = true) val ClassId : Long,
-    val ClassName : String
+data class Class(
+    @PrimaryKey(autoGenerate = true) var ClassId : Long=0L,
+    var ClassName : String?
 )
 
 @Entity(
@@ -34,12 +35,12 @@ data class ClassTable(
         
     ]
 )
-data class AttendenceTable(
-    @PrimaryKey(autoGenerate = true) val AttendenceID : Long,
-    val StudentID : Long,
-    val ClassID : Long,
-    val Date : String,
-    val Status : Boolean
+data class Attendence(
+    @PrimaryKey(autoGenerate = true) val AttendenceID : Long=0L,
+    var StudentID : Long,
+    var ClassID : Long,
+    var Date : String?,
+    var Status : Boolean?
 )
 
 // TypeConvertors

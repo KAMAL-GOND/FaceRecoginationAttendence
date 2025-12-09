@@ -8,7 +8,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.facerecoginationattendence.Data.LocalDatabase.AppDatabase
-import com.example.facerecoginationattendence.Domain.Models.Students
+import com.example.facerecoginationattendence.Data.LocalDatabase.Students
+
 import com.example.facerecoginationattendence.MyApp
 import getEmbeddingFromBitmap
 import kotlinx.coroutines.Dispatchers

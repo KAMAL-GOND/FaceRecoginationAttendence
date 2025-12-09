@@ -38,7 +38,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.example.facerecoginationattendence.Domain.Models.Students
+
 import com.example.facerecoginationattendence.Domain.StudentSideVeiwModel
 
 @RequiresApi(Build.VERSION_CODES.R)

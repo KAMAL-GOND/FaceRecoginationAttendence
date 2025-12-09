@@ -36,7 +36,8 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.example.facerecoginationattendence.Domain.Models.Students
+import com.example.facerecoginationattendence.Data.LocalDatabase.Students
+
 import com.example.facerecoginationattendence.Domain.StudentSideVeiwModel
 
 @RequiresApi(Build.VERSION_CODES.R)
@@ -118,7 +119,16 @@ fun AddStudentScreen(veiwModel: StudentSideVeiwModel){
         OutlinedTextField(value = Class, onValueChange = {Class = it}, label = { Text(text = "Class")})
 
         if(name.isNotEmpty() && rollNo.isNotEmpty() && Class.isNotEmpty() && imageBitmapState.value != null){
-            Button(onClick = {veiwModel.AddStudent(Students(name = name,rollNo = rollNo,Class = Class, imageBitmap = imageBitmapState.value))  }) {
+            Button(onClick = {veiwModel.AddStudent(
+                Students(
+                    name = name,
+                    //rollNo = rollNo,
+                    Class = Class,
+                    imageBitmap = imageBitmapState.value,
+                    StudentID = rollNo.toLong(),
+                    //PhotoEmbedding = TODO(),
+                )
+            )  }) {
                 Text(text = "Add Student")
             }
         }

@@ -13,9 +13,9 @@ import androidx.room.TypeConverters
 
 @Database(
     entities = [
-        StudentTable::class,
-        ClassTable::class,
-        AttendenceTable::class
+        Students::class,
+        Class::class,
+        Attendence::class
     ],
     version = 1,
     exportSchema = false
