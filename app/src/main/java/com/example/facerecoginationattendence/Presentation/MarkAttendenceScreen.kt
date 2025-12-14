@@ -11,18 +11,26 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -38,6 +46,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 
 import com.example.facerecoginationattendence.Domain.StudentSideVeiwModel
 import java.time.LocalDate
@@ -45,22 +54,29 @@ import java.time.LocalDate
 @RequiresApi(Build.VERSION_CODES.R)
 @Composable
 // MARK ATTENDENCE SCREEN
-fun MarkAttendenceScreen(veiwModel: StudentSideVeiwModel){
+
+fun MarkAttendenceScreen(veiwModel: StudentSideVeiwModel) {
     val imageBitmapState = remember { mutableStateOf<Bitmap?>(null) }
     val context = LocalContext.current
     var showPhotoManager by remember { mutableStateOf(false) }
 
     var Class by remember { mutableStateOf("") }
 
-    fun OnDismiss(){
+    fun OnDismiss() {
         showPhotoManager = false
     }
 
-
+    var DialogBoxState by remember { mutableStateOf<Boolean>(false) }
+    var ClassName by remember { mutableStateOf("") }
+    var TeacherName by remember { mutableStateOf("") }
 
     if (showPhotoManager) {
 
-        val returnedBitmap = PhotoManager(context = context, OnDismiss = {OnDismiss()},veiwModel.appLicationcontext)
+        val returnedBitmap = PhotoManager(
+            context = context,
+            OnDismiss = { OnDismiss() },
+            veiwModel.appLicationcontext
+        )
 
 
         LaunchedEffect(returnedBitmap) {
@@ -68,62 +84,109 @@ fun MarkAttendenceScreen(veiwModel: StudentSideVeiwModel){
                 imageBitmapState.value = returnedBitmap
 
                 showPhotoManager = false
-            }
-            else{
+            } else {
                 //Toast.makeText(context,"No Image Selected", Toast.LENGTH_SHORT).show()
                 //showPhotoManager = false
             }
 
         }
     }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(12.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top
-    ) {
-        Spacer(modifier = Modifier.height(25.dp))
-        Box(modifier = Modifier
-            .size(150.dp)
-            .clip(RectangleShape)
-            .border(2.dp, Color.Gray, RectangleShape)
-            .clickable {
-
-                showPhotoManager = true
+    Scaffold(
+        floatingActionButton = {FloatingActionButton(onClick = {DialogBoxState=true}) {
+            Column {
+                Icon(imageVector = Icons.Default.Add,"add")
+                Text("Add Class")
             }
-        ) {
-            if (imageBitmapState.value != null) {
-                Image(
-                    bitmap = imageBitmapState.value!!.asImageBitmap(),
-                    contentDescription = "Student Image",
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
-            } else {
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = "Add Photo Placeholder",
-                    modifier = Modifier
-                        .size(80.dp)
-                        .align(Alignment.Center)
-                )
 
+        }}
+    ) { its->
+
+        if(DialogBoxState){
+
+            Dialog(onDismissRequest = {DialogBoxState = false},) {
+                Card (modifier = Modifier.fillMaxWidth(0.7f).fillMaxHeight(0.6f),  ) {
+                    Column() {
+                        OutlinedTextField(
+                            value = ClassName,
+                            onValueChange = { ClassName = it },
+                            label = {Text(text = "Class Name")},
+                        )
+                        OutlinedTextField(
+                            value = TeacherName,
+                            onValueChange = { TeacherName = it },
+                            label = {Text(text = "Class Name")},
+                        )
+                        Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth().padding(its)){
+                            Button(onClick = {veiwModel.AddClass(com.example.facerecoginationattendence.Data.LocalDatabase.Class(ClassName=ClassName,TeachersName=TeacherName))
+                            DialogBoxState=false}) {
+                                Text("add")
+                            }
+                            Button(onClick = {DialogBoxState = false}) {
+                                Text("Dismiss")
+                            }
+                        }
+                    }
+                }
             }
         }
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Top
+        ) {
+            Spacer(modifier = Modifier.height(25.dp))
+            Box(
+                modifier = Modifier
+                    .size(150.dp)
+                    .clip(RectangleShape)
+                    .border(2.dp, Color.Gray, RectangleShape)
+                    .clickable {
+
+                        showPhotoManager = true
+                    }
+            ) {
+                if (imageBitmapState.value != null) {
+                    Image(
+                        bitmap = imageBitmapState.value!!.asImageBitmap(),
+                        contentDescription = "Student Image",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = "Add Photo Placeholder",
+                        modifier = Modifier
+                            .size(80.dp)
+                            .align(Alignment.Center)
+                    )
+
+                }
+            }
 //        Spacer(modifier = Modifier.height(16.dp))
 //        OutlinedTextField(value = name, onValueChange = {name = it}, label = { Text(text = "Student Name")})
 //        Spacer(modifier = Modifier.height(16.dp))
 //        OutlinedTextField(value = rollNo, onValueChange = {rollNo = it}, label = { Text(text = "Roll No")})
-        Spacer(modifier = Modifier.height(16.dp))
-        OutlinedTextField(value = Class, onValueChange = {Class = it}, label = { Text(text = "Class")})
+            Spacer(modifier = Modifier.height(16.dp))
+            OutlinedTextField(
+                value = Class,
+                onValueChange = { Class = it },
+                label = { Text(text = "Class") })
 
-        if( Class.isNotEmpty() && imageBitmapState.value != null){
-            Button(onClick = {veiwModel.MarkAttendence(Class = Class, image = imageBitmapState.value!! )}) {
-                Text(text = "Mark Attendence")
+            if (Class.isNotEmpty() && imageBitmapState.value != null) {
+                Button(onClick = {
+                    veiwModel.MarkAttendence(
+                        Class = Class,
+                        image = imageBitmapState.value!!
+                    )
+                }) {
+                    Text(text = "Mark Attendence")
+                }
             }
-        }
 
+        }
     }
 }

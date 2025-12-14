@@ -18,14 +18,14 @@ data class Students(
 
     @TypeConverters(FloatArrayConvertor ::class)
     var PhotoEmbedding: FloatArray? = null,
-    @Ignore
-    var imageBitmap: Bitmap? = null
+
 )
 
 @Entity
 data class Class(
     @PrimaryKey(autoGenerate = true) var ClassId : Long=0L,
-    var ClassName : String?
+    var ClassName : String?,
+    var TeachersName : String?
 )
 
 @Entity(

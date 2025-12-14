@@ -127,10 +127,10 @@ fun AddStudentScreen(veiwModel: StudentSideVeiwModel){
                     name = name,
                     //rollNo = rollNo,
                     Class = Class,
-                    imageBitmap = imageBitmapState.value,
+
                     StudentID = rollNo.toLong(),
                     //PhotoEmbedding = TODO(),
-                )
+                ),imageBitmap = imageBitmapState.value,
             )  }) {
                 Text(text = "Add Student")
             }

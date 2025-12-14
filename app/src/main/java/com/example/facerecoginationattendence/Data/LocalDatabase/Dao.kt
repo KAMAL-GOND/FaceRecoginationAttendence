@@ -39,7 +39,7 @@ interface StudentDao{
 
 @Dao
 interface ClassDao{
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun InsertClass(Class : Class)
     @Delete
     suspend fun DeleteClass(Class: Class)

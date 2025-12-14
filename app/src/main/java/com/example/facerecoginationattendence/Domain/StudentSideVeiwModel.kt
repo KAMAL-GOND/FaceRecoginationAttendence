@@ -8,6 +8,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.facerecoginationattendence.Data.LocalDatabase.AppDatabase
+import com.example.facerecoginationattendence.Data.LocalDatabase.Class
 import com.example.facerecoginationattendence.Data.LocalDatabase.Students
 
 import com.example.facerecoginationattendence.MyApp
@@ -42,8 +43,8 @@ class StudentSideVeiwModel(appLicationcontext: Context) : ViewModel() {
 //        //Student.PhotoEmbedding = getEmbeddingFromBitmap(Student.imageBitmap!!, interpreter)
 //        //Log.d("photoembediing",croppedImage.toString())
 //    }
-    fun AddStudent(student: Students) = viewModelScope.launch(Dispatchers.IO) {
-        student.imageBitmap?.let { bitmap ->
+    fun AddStudent(student: Students,imageBitmap : Bitmap?) = viewModelScope.launch(Dispatchers.IO) {
+        imageBitmap?.let { bitmap ->
             // Call face_detector which returns a Flow, and collect the result.
             // No callback is needed here.
             Single_face_detector(appLicationcontext, bitmap.copy(Bitmap.Config.ARGB_8888, true)).collect { result ->
@@ -56,8 +57,10 @@ class StudentSideVeiwModel(appLicationcontext: Context) : ViewModel() {
 
                         // Assign the generated embedding back to the student object.
                         student.PhotoEmbedding = embedding
+                        db.studentDao().InsertStudent(student)
 
                         Log.d("AddStudent", "Successfully generated embedding: $embeddingString")
+
                     } else {
                         Log.d("AddStudent", "Face detection ran, but no face was found in the image.")
                     }
@@ -98,6 +101,10 @@ class StudentSideVeiwModel(appLicationcontext: Context) : ViewModel() {
             }
 
         }
+    }
+
+    fun AddClass(Class: Class) = viewModelScope.launch(Dispatchers.IO){
+        db.classDao().InsertClass(Class);
     }
 
 
