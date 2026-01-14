@@ -47,18 +47,33 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.example.facerecoginationattendence.Data.LocalDatabase.AppDatabase
+import com.example.facerecoginationattendence.Data.LocalDatabase.Class
 
 import com.example.facerecoginationattendence.Domain.StudentSideVeiwModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.time.LocalDate
+import kotlin.coroutines.CoroutineContext
 
 @RequiresApi(Build.VERSION_CODES.R)
 @Composable
 // MARK ATTENDENCE SCREEN
 
 fun MarkAttendenceScreen(veiwModel: StudentSideVeiwModel) {
+    // db class
+    val db = AppDatabase.getDatabase(veiwModel.appLicationcontext)
+    var classes by remember { mutableStateOf<List<Class>>(emptyList()) }
+    var showPhotoManager by remember { mutableStateOf(false) }
+    var DialogBoxState by remember { mutableStateOf<Boolean>(false) }
+
+    LaunchedEffect(DialogBoxState) {
+        classes = withContext(Dispatchers.IO) { db.classDao().GetAllClass() }
+    }
+
     val imageBitmapState = remember { mutableStateOf<Bitmap?>(null) }
     val context = LocalContext.current
-    var showPhotoManager by remember { mutableStateOf(false) }
+
 
     var Class by remember { mutableStateOf("") }
 
@@ -66,7 +81,7 @@ fun MarkAttendenceScreen(veiwModel: StudentSideVeiwModel) {
         showPhotoManager = false
     }
 
-    var DialogBoxState by remember { mutableStateOf<Boolean>(false) }
+
     var ClassName by remember { mutableStateOf("") }
     var TeacherName by remember { mutableStateOf("") }
 
@@ -172,6 +187,7 @@ fun MarkAttendenceScreen(veiwModel: StudentSideVeiwModel) {
 //        OutlinedTextField(value = rollNo, onValueChange = {rollNo = it}, label = { Text(text = "Roll No")})
             Spacer(modifier = Modifier.height(16.dp))
             OutlinedTextField(
+                modifier = Modifier.clickable(onClick = {}),
                 value = Class,
                 onValueChange = { Class = it },
                 label = { Text(text = "Class") })

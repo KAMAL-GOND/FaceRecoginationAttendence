@@ -36,9 +36,12 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.example.facerecoginationattendence.Data.LocalDatabase.AppDatabase
 import com.example.facerecoginationattendence.Data.LocalDatabase.Students
 
 import com.example.facerecoginationattendence.Domain.StudentSideVeiwModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -46,6 +49,14 @@ import java.time.LocalDateTime
 @Composable
 // FOR SINGLE STUDENT ADD
 fun AddStudentScreen(veiwModel: StudentSideVeiwModel){
+    val db = AppDatabase.getDatabase(veiwModel.appLicationcontext)
+    var classes by remember { mutableStateOf<List<com.example.facerecoginationattendence.Data.LocalDatabase.Class>>(emptyList()) }
+
+
+    LaunchedEffect(Unit) {
+        classes = withContext(Dispatchers.IO) { db.classDao().GetAllClass() }
+    }
+
     val imageBitmapState = remember { mutableStateOf<Bitmap?>(null) }
     val context = LocalContext.current
     var showPhotoManager by remember { mutableStateOf(false) }
