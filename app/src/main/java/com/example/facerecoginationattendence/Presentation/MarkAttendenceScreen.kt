@@ -114,7 +114,7 @@ fun MarkAttendenceScreen(veiwModel: StudentSideVeiwModel) {
                         OutlinedTextField(
                             value = TeacherName,
                             onValueChange = { TeacherName = it },
-                            label = {Text(text = "Class Name")},
+                            label = {Text(text = "TEACHER Name")},
                         )
                         Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth().padding(its)){
                             Button(onClick = {veiwModel.AddClass(com.example.facerecoginationattendence.Data.LocalDatabase.Class(ClassName=ClassName,TeachersName=TeacherName))
