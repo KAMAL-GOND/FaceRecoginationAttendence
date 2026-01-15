@@ -22,9 +22,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
@@ -61,6 +64,8 @@ import kotlin.coroutines.CoroutineContext
 // MARK ATTENDENCE SCREEN
 
 fun MarkAttendenceScreen(veiwModel: StudentSideVeiwModel) {
+    //dropdown menu
+    var dropDownMenuExpansion by remember { mutableStateOf(false) }
     // db class
     val db = AppDatabase.getDatabase(veiwModel.appLicationcontext)
     var classes by remember { mutableStateOf<List<Class>>(emptyList()) }
@@ -186,11 +191,31 @@ fun MarkAttendenceScreen(veiwModel: StudentSideVeiwModel) {
 //        Spacer(modifier = Modifier.height(16.dp))
 //        OutlinedTextField(value = rollNo, onValueChange = {rollNo = it}, label = { Text(text = "Roll No")})
             Spacer(modifier = Modifier.height(16.dp))
-            OutlinedTextField(
-                modifier = Modifier.clickable(onClick = {}),
-                value = Class,
-                onValueChange = { Class = it },
-                label = { Text(text = "Class") })
+            Box {
+                OutlinedTextField(
+                    modifier = Modifier.clickable(onClick = { dropDownMenuExpansion = true }),
+                    value = Class,
+                    readOnly = true,
+                    onValueChange = { Class = it },
+                    label = { Text(text = "Class") },
+                    trailingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Menu,
+                            contentDescription = null,
+                            modifier = Modifier.clickable { dropDownMenuExpansion = true }
+                        )
+                    }
+                )
+                DropdownMenu(expanded = dropDownMenuExpansion, onDismissRequest = {dropDownMenuExpansion = false}) {
+                    classes.forEach { a->
+                        DropdownMenuItem(
+                            text = {Text(a.ClassName.toString())},
+                            onClick = {Class=a.ClassName.toString()
+                            dropDownMenuExpansion = false}
+                        )
+                    }
+                }
+            }
 
             if (Class.isNotEmpty() && imageBitmapState.value != null) {
                 Button(onClick = {

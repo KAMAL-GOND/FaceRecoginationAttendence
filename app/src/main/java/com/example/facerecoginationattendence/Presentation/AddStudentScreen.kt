@@ -17,8 +17,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -51,7 +54,7 @@ import java.time.LocalDateTime
 fun AddStudentScreen(veiwModel: StudentSideVeiwModel){
     val db = AppDatabase.getDatabase(veiwModel.appLicationcontext)
     var classes by remember { mutableStateOf<List<com.example.facerecoginationattendence.Data.LocalDatabase.Class>>(emptyList()) }
-
+    var dropDownMenuExpansion by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         classes = withContext(Dispatchers.IO) { db.classDao().GetAllClass() }
@@ -130,7 +133,32 @@ fun AddStudentScreen(veiwModel: StudentSideVeiwModel){
         Spacer(modifier = Modifier.height(16.dp))
         OutlinedTextField(value = rollNo, onValueChange = {rollNo = it}, label = { Text(text = "Roll No")})
         Spacer(modifier = Modifier.height(16.dp))
-        OutlinedTextField(value = Class, onValueChange = {Class = it}, label = { Text(text = "Class")})
+        Box {
+            OutlinedTextField(
+                modifier = Modifier.clickable(onClick = { dropDownMenuExpansion = true }),
+                value = Class,
+                readOnly = true,
+                onValueChange = { Class = it },
+                label = { Text(text = "Class") },
+                trailingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Menu,
+                        contentDescription = null,
+                        modifier = Modifier.clickable { dropDownMenuExpansion = true }
+                    )
+                }
+            )
+            DropdownMenu(expanded = dropDownMenuExpansion, onDismissRequest = {dropDownMenuExpansion = false}) {
+                classes.forEach { a->
+                    DropdownMenuItem(
+                        text = {Text(a.ClassName.toString())},
+                        onClick = {Class=a.ClassName.toString()
+                            dropDownMenuExpansion = false}
+                    )
+                }
+            }
+        }
+
 
         if(name.isNotEmpty() && rollNo.isNotEmpty() && Class.isNotEmpty() && imageBitmapState.value != null){
             Button(onClick = {veiwModel.AddStudent(
