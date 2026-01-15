@@ -17,7 +17,7 @@ import androidx.room.TypeConverters
         Class::class,
         Attendence::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 @TypeConverters(FloatArrayConvertor::class)

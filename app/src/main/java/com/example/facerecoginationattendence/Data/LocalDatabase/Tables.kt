@@ -30,7 +30,7 @@ data class Class(
 
 @Entity(
     indices = [Index(value = ["StudentID"]),
-    Index(value = ["ClassID"]),
+    Index(value = ["ClassName"]),
     Index(value = ["Date"])
         
     ]
@@ -38,7 +38,7 @@ data class Class(
 data class Attendence(
     @PrimaryKey(autoGenerate = true) val AttendenceID : Long=0L,
     var StudentID : Long,
-    var ClassID : Long,
+    var ClassName: String?,
     var Date : String?,
     var Status : Boolean?
 )

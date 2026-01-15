@@ -95,8 +95,8 @@ interface AttendanceDao {
     // ---------------------------
     // QUERY: BY CLASS
     // ---------------------------
-    @Query("SELECT * FROM Attendence WHERE ClassID = :classId")
-    suspend fun getAttendanceForClass(classId: Long): List<Attendence>
+    @Query("SELECT * FROM Attendence WHERE ClassName = :className")
+    suspend fun getAttendanceForClass(className: String): List<Attendence>
 
 
     // ---------------------------
@@ -109,8 +109,8 @@ interface AttendanceDao {
     // ---------------------------
     // QUERY: BY CLASS + DATE
     // ---------------------------
-    @Query("SELECT * FROM Attendence WHERE ClassID = :classId AND Date = :date")
-    suspend fun getClassAttendanceOnDate(classId: Long, date: String): List<Attendence>
+    @Query("SELECT * FROM Attendence WHERE ClassName = :className AND Date = :date")
+    suspend fun getClassAttendanceOnDate(className: String, date: String): List<Attendence>
 
 
     // ---------------------------
@@ -153,12 +153,12 @@ interface AttendanceDao {
     @Query("""
         SELECT COUNT(*) FROM Attendence
         WHERE StudentID = :studentId 
-        AND ClassID = :classId 
+        AND ClassName = :className 
         AND Date = :date
     """)
     suspend fun alreadyMarked(
         studentId: Long,
-        classId: Long,
+        className: String,
         date: String
     ): Int
 
@@ -166,8 +166,8 @@ interface AttendanceDao {
     // ---------- QUERY: All Attendance For A Class On A Day ----------
     @Query("""
         SELECT * FROM Attendence
-        WHERE ClassID = :classId 
+        WHERE ClassName = :className
         AND Date = :date
     """)
-    suspend fun getClassAttendanceForDay(classId: Long, date: String): List<Attendence>
+    suspend fun getClassAttendanceForDay(className: String, date: String): List<Attendence>
 }

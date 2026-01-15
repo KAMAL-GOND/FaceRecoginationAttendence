@@ -3,13 +3,18 @@ package com.example.facerecoginationattendence.Domain
 import android.app.Application
 import android.content.Context
 import android.graphics.Bitmap
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
+import androidx.compose.material3.DatePicker
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.facerecoginationattendence.Data.LocalDatabase.AppDatabase
+import com.example.facerecoginationattendence.Data.LocalDatabase.Attendence
 import com.example.facerecoginationattendence.Data.LocalDatabase.Class
 import com.example.facerecoginationattendence.Data.LocalDatabase.Students
+import com.example.facerecoginationattendence.Domain.Models.isSamePerson
 
 import com.example.facerecoginationattendence.MyApp
 import getEmbeddingFromBitmap
@@ -19,7 +24,9 @@ import org.tensorflow.lite.Interpreter
 import java.io.FileInputStream
 import java.nio.MappedByteBuffer
 import java.nio.channels.FileChannel
+import java.time.LocalDate
 import kotlin.jvm.optionals.getOrNull
+
 
 class StudentSideVeiwModel(appLicationcontext: Context) : ViewModel() {
 
@@ -70,7 +77,9 @@ class StudentSideVeiwModel(appLicationcontext: Context) : ViewModel() {
             }
         } ?: Log.e("AddStudent", "Student imageBitmap is null, cannot add student.")
     }
-    fun MarkAttendence(Class:String , image : Bitmap)= viewModelScope.launch() {
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun MarkAttendence(Class:String, image : Bitmap)= viewModelScope.launch() {
+        var StudentList = db.studentDao().GetStudentByClass(Class)
         var embeddings : ArrayList<String>
         Multiple_face_detector(appLicationcontext,image).collect{
             if(it.isSuccess){
@@ -81,6 +90,11 @@ class StudentSideVeiwModel(appLicationcontext: Context) : ViewModel() {
                     embeddings = ArrayList()
                     for(bitmap in BitMapArray){
                         var embedding = getEmbeddingFromBitmap(bitmap,interpreter)
+                        for(student in StudentList){
+                            if(isSamePerson(embedding,student.PhotoEmbedding!!)){
+                                db.attendanceDao().insertAttendance(Attendence(StudentID = student.StudentID, ClassName = Class, Status = true, Date = LocalDate.now().toString()))
+                            }
+                        }
                         Log.d("MarkAttendence",embedding.joinToString(","))
                         embeddings?.add(embedding.joinToString (","))
 

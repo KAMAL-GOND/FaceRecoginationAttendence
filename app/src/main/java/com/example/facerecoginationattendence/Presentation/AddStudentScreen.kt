@@ -65,7 +65,8 @@ fun AddStudentScreen(veiwModel: StudentSideVeiwModel){
     var showPhotoManager by remember { mutableStateOf(false) }
     var name by remember { mutableStateOf("") }
     var rollNo by remember { mutableStateOf("") }
-    var Class by remember { mutableStateOf("") }
+    var ClassName by remember { mutableStateOf("") }
+
     // FUNCTION TO PASS FOR MAKING SHOW POHTOTO MANAGER TRUE SO THAT AGAIN , IT DONT REMAIN TRUE WHEN  BOTTOM SHEET IS CLOSSE , FOR MAKING NEXT ATTEMPT TO SHOW PHOTO MANAGER
 
     fun OnDismiss(){
@@ -136,9 +137,9 @@ fun AddStudentScreen(veiwModel: StudentSideVeiwModel){
         Box {
             OutlinedTextField(
                 modifier = Modifier.clickable(onClick = { dropDownMenuExpansion = true }),
-                value = Class,
+                value = ClassName,
                 readOnly = true,
-                onValueChange = { Class = it },
+                onValueChange = { ClassName = it },
                 label = { Text(text = "Class") },
                 trailingIcon = {
                     Icon(
@@ -152,7 +153,7 @@ fun AddStudentScreen(veiwModel: StudentSideVeiwModel){
                 classes.forEach { a->
                     DropdownMenuItem(
                         text = {Text(a.ClassName.toString())},
-                        onClick = {Class=a.ClassName.toString()
+                        onClick = {ClassName=a.ClassName.toString()
                             dropDownMenuExpansion = false}
                     )
                 }
@@ -160,12 +161,12 @@ fun AddStudentScreen(veiwModel: StudentSideVeiwModel){
         }
 
 
-        if(name.isNotEmpty() && rollNo.isNotEmpty() && Class.isNotEmpty() && imageBitmapState.value != null){
+        if(name.isNotEmpty() && rollNo.isNotEmpty() && ClassName.isNotEmpty() && imageBitmapState.value != null){
             Button(onClick = {veiwModel.AddStudent(
                 Students(
                     name = name,
                     //rollNo = rollNo,
-                    Class = Class,
+                    Class = ClassName,
 
                     StudentID = rollNo.toLong(),
                     //PhotoEmbedding = TODO(),
