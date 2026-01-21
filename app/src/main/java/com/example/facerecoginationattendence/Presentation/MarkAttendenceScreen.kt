@@ -56,13 +56,13 @@ import com.example.facerecoginationattendence.Data.LocalDatabase.Class
 import com.example.facerecoginationattendence.Domain.StudentSideVeiwModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.Serializable
 import java.time.LocalDate
 import kotlin.coroutines.CoroutineContext
 
+
 @RequiresApi(Build.VERSION_CODES.R)
 @Composable
-// MARK ATTENDENCE SCREEN
-
 fun MarkAttendenceScreen(veiwModel: StudentSideVeiwModel) {
     //dropdown menu
     var dropDownMenuExpansion by remember { mutableStateOf(false) }
