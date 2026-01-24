@@ -2,9 +2,10 @@ package com.example.facerecoginationattendence.Presentation.navigation
 
 import kotlinx.serialization.Serializable
 
-@Serializable
+
+@kotlinx.serialization.Serializable
 sealed class Routes {
-    @Serializable
+    @kotlinx.serialization.Serializable
     object MarkAttendence : Routes()
 
     @Serializable

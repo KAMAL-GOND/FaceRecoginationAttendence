@@ -112,43 +112,43 @@ fun MarkAttendenceScreen(veiwModel: StudentSideVeiwModel) {
         }
     }
     Scaffold(
-        floatingActionButton = {FloatingActionButton(onClick = {DialogBoxState=true}) {
-            Column {
-                Icon(imageVector = Icons.Default.Add,"add")
-                Text("Add Class")
-            }
-
-        }}
+//        floatingActionButton = {FloatingActionButton(onClick = {DialogBoxState=true}) {
+//            Column {
+//                Icon(imageVector = Icons.Default.Add,"add")
+//                Text("Add Class")
+//            }
+//
+//        }}
     ) { its->
 
-        if(DialogBoxState){
-
-            Dialog(onDismissRequest = {DialogBoxState = false},) {
-                Card (modifier = Modifier.fillMaxWidth(0.7f).fillMaxHeight(0.6f),  ) {
-                    Column() {
-                        OutlinedTextField(
-                            value = ClassName,
-                            onValueChange = { ClassName = it },
-                            label = {Text(text = "Class Name")},
-                        )
-                        OutlinedTextField(
-                            value = TeacherName,
-                            onValueChange = { TeacherName = it },
-                            label = {Text(text = "TEACHER Name")},
-                        )
-                        Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth().padding(its)){
-                            Button(onClick = {veiwModel.AddClass(com.example.facerecoginationattendence.Data.LocalDatabase.Class(ClassName=ClassName,TeachersName=TeacherName))
-                            DialogBoxState=false}) {
-                                Text("add")
-                            }
-                            Button(onClick = {DialogBoxState = false}) {
-                                Text("Dismiss")
-                            }
-                        }
-                    }
-                }
-            }
-        }
+//        if(DialogBoxState){
+//
+//            Dialog(onDismissRequest = {DialogBoxState = false},) {
+//                Card (modifier = Modifier.fillMaxWidth(0.7f).fillMaxHeight(0.6f),  ) {
+//                    Column() {
+//                        OutlinedTextField(
+//                            value = ClassName,
+//                            onValueChange = { ClassName = it },
+//                            label = {Text(text = "Class Name")},
+//                        )
+//                        OutlinedTextField(
+//                            value = TeacherName,
+//                            onValueChange = { TeacherName = it },
+//                            label = {Text(text = "TEACHER Name")},
+//                        )
+//                        Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth().padding(its)){
+//                            Button(onClick = {veiwModel.AddClass(com.example.facerecoginationattendence.Data.LocalDatabase.Class(ClassName=ClassName,TeachersName=TeacherName))
+//                            DialogBoxState=false}) {
+//                                Text("add")
+//                            }
+//                            Button(onClick = {DialogBoxState = false}) {
+//                                Text("Dismiss")
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
 
         Column(
             modifier = Modifier
