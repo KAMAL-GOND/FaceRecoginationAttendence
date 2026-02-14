@@ -17,6 +17,7 @@ import com.example.facerecoginationattendence.Data.LocalDatabase.Students
 import com.example.facerecoginationattendence.Domain.Models.isSamePerson
 
 import com.example.facerecoginationattendence.MyApp
+import com.example.facerecoginationattendence.Presentation.StudentProfile
 import getEmbeddingFromBitmap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -119,6 +120,19 @@ class StudentSideVeiwModel(appLicationcontext: Context) : ViewModel() {
 
     fun AddClass(Class: Class) = viewModelScope.launch(Dispatchers.IO){
         db.classDao().InsertClass(Class);
+    }
+
+    fun getStudentAttendenceByMonth(studeniId:Long,month:String): List<Attendence>?{
+        var attendence :List<Attendence>?=null
+        viewModelScope.launch {
+            attendence =db.attendanceDao().getMonthlyAttendance(studeniId,month)
+        }
+        return attendence
+    }
+    fun getStudentProfile(studentid:Long):Students{
+        var SudentProfile : Students?=null
+        viewModelScope.launch { SudentProfile = db.studentDao().GetStudent(studentid) }
+        return SudentProfile!!
     }
 
 

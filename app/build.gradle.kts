@@ -50,6 +50,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.androidx.compose.runtime)
     //implementation(libs.androidx.compose.material3)
     val room_version = "2.8.4"
 
@@ -76,6 +77,12 @@ dependencies {
 
     implementation("androidx.navigation:navigation-compose:$nav_version")
     implementation(libs.kotlinx.serialization.json)
+    // module-level build.gradle
+        implementation ("io.github.boguszpawlowski.composecalendar:composecalendar:+")
+
+        // separate artifact with utilities for working with kotlinx-datetime
+        implementation ("io.github.boguszpawlowski.composecalendar:kotlinx-datetime:+")
+
 
 
     implementation(libs.androidx.appcompat)
