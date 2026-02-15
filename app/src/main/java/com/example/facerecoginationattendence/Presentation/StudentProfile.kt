@@ -1,6 +1,7 @@
 package com.example.facerecoginationattendence.Presentation
 
 import android.os.Build
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
@@ -26,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -34,6 +36,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.modifier.modifierLocalConsumer
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.facerecoginationattendence.Data.LocalDatabase.Attendence
@@ -56,18 +59,30 @@ import java.util.Locale
 @Composable
 fun StudentProfile(studentId: Long,veiwModel: StudentSideVeiwModel) {
     var month = remember { mutableStateOf(YearMonth.now())}
-    var MonthAttendence : MutableList<String>? = null
-    var StudentProfile: MutableState<Students>? = remember { mutableStateOf(veiwModel.getStudentProfile(studentId)) }
+    var MonthAttendenceList: MutableState<MutableList<String>> = remember { mutableStateOf(mutableListOf("0")) }
+    var StudentProfile = veiwModel.getStudentPrfofileState.collectAsState()
     val calendarState = rememberCalendarState(
 
     )
+    var MonthAttendance = veiwModel.getAttendanceFlowState.collectAsState()
 
 
     LaunchedEffect(key1= calendarState.monthState.currentMonth.toString()) {
-        var AttendenceList = veiwModel.getStudentAttendenceByMonth(studentId, calendarState.monthState.currentMonth.toString())
-        AttendenceList?.forEach{MonthAttendence?.add(it.Date!!)}
+        veiwModel.getStudentProfile(studentId)
+        veiwModel.getStudentAttendenceByMonth(studentId, calendarState.monthState.currentMonth.toString())
+//        var AttendenceList = veiwModel.getStudentAttendenceByMonth(studentId, calendarState.monthState.currentMonth.toString()) as List<Attendence >
+//        AttendenceList.forEach{MonthAttendence.value.add(it.Date!!)}
 
     }
+    if(StudentProfile.value.error!= null || MonthAttendance.value.error!= null ){
+        Toast.makeText(LocalContext.current,"${StudentProfile.value.error}+${MonthAttendance.value.error}",Toast.LENGTH_LONG)
+        Text("null error")
+    }
+    else if (MonthAttendance.value.success != null){
+        (MonthAttendance.value. success as List<Attendence>).forEach {
+            MonthAttendenceList.value.add(it.Date!!.toString())
+        }
+
     Column(modifier = Modifier.fillMaxSize().padding(5.dp)) {
         Row(modifier = Modifier.fillMaxWidth().fillMaxHeight(0.3f).padding(7.dp), horizontalArrangement = Arrangement.Center){
             Box(modifier = Modifier.fillMaxHeight().fillMaxWidth(0.3f).clip(CircleShape).border(width = 2.dp, color = Color.Black,CircleShape)){
@@ -75,22 +90,53 @@ fun StudentProfile(studentId: Long,veiwModel: StudentSideVeiwModel) {
             }
             Spacer(Modifier.width(5.dp))
             Column(modifier = Modifier.fillMaxHeight().padding(5.dp)){
-                Text(StudentProfile!!.value.name.toString())
-                Text(StudentProfile.value.StudentID.toString())
-                Text(StudentProfile.value.Class.toString())
+                Text((StudentProfile.value.success as Students).name.toString())
+                Text((StudentProfile.value.success as Students).name.toString())
+                Text((StudentProfile.value.success as Students).name.toString())
             }
             Spacer(Modifier.width(10.dp))
-            var attendencePercentage = (MonthAttendence!!.size/calendarState.monthState.currentMonth.lengthOfMonth())*100
-            Text(attendencePercentage.toString(), modifier = Modifier.size(20.dp))
+            var attendencePercentage = (MonthAttendenceList.value.size/calendarState.monthState.currentMonth.lengthOfMonth())*100
+            Text(attendencePercentage.toString(), modifier = Modifier.size(20.dp))}
 
-        }
+
         StaticCalendar (
             modifier = Modifier
                 .padding(8.dp)
                 .animateContentSize(),
             dayContent = {day->
                 val color = when{
-                    MonthAttendence!!.contains(day.date.toString())-> {
+                    MonthAttendenceList.value.contains(day.date.toString())-> {
+                        Color.Green
+                    }
+                    else-> Color.Transparent
+
+                }
+                Box(
+                    modifier = Modifier
+                        .background(color)
+                        .padding(4.dp)
+                ) {
+                    Text(day.date.dayOfMonth.toString())
+                }
+
+            },
+            calendarState = calendarState
+
+
+        ) }
+
+
+    }
+    else{
+        Text(MonthAttendance.value.toString())
+        Text(StudentProfile.value.toString())
+        StaticCalendar (
+            modifier = Modifier
+                .padding(8.dp)
+                .animateContentSize(),
+            dayContent = {day->
+                val color = when{
+                    MonthAttendenceList.value.contains(day.date.toString())-> {
                         Color.Green
                     }
                     else-> Color.Transparent
@@ -109,8 +155,6 @@ fun StudentProfile(studentId: Long,veiwModel: StudentSideVeiwModel) {
 
 
         )
-
-
     }
 
 

@@ -7,6 +7,7 @@ import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.material3.DatePicker
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -20,6 +21,8 @@ import com.example.facerecoginationattendence.MyApp
 import com.example.facerecoginationattendence.Presentation.StudentProfile
 import getEmbeddingFromBitmap
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.tensorflow.lite.Interpreter
 import java.io.FileInputStream
@@ -121,24 +124,59 @@ class StudentSideVeiwModel(appLicationcontext: Context) : ViewModel() {
     fun AddClass(Class: Class) = viewModelScope.launch(Dispatchers.IO){
         db.classDao().InsertClass(Class);
     }
+    var getAttendanceFlowState = MutableStateFlow(state()).asStateFlow()
 
-    fun getStudentAttendenceByMonth(studeniId:Long,month:String): List<Attendence>?{
+    fun getStudentAttendenceByMonth(studeniId:Long,month:String){
         var attendence :List<Attendence>?=null
         viewModelScope.launch {
-            attendence =db.attendanceDao().getMonthlyAttendance(studeniId,month)
+            try{
+                attendence =db.attendanceDao().getMonthlyAttendance(studeniId,month)
+                if(attendence!=null){
+                    getAttendanceFlowState.value.success = attendence
+                }
+                else{
+                    getAttendanceFlowState.value.error= "null error"
+                }
+
+
+            }
+            catch (e:Exception){
+                getAttendanceFlowState.value.error=e.toString()
+            }
+
         }
-        return attendence
+
     }
-    fun getStudentProfile(studentid:Long?):Students{
-        var SudentProfile : Students?=null
-        viewModelScope.launch { SudentProfile = db.studentDao().GetStudent(studentid!!) }
-        return SudentProfile!!
+    var getStudentPrfofileState = MutableStateFlow(state()).asStateFlow()
+    fun getStudentProfile(studentid:Long?){
+        if(studentid==null){
+            getStudentPrfofileState.value.error=null
+        }
+        else{
+            var SudentProfile : Students?=null
+
+            viewModelScope.launch {
+                try{
+                    SudentProfile = db.studentDao().GetStudent(studentid)
+                    getStudentPrfofileState.value.success=SudentProfile
+                }
+                catch (e: Exception){
+                    getAttendanceFlowState.value.error=e.toString()
+                }
+                 }
+
+        }
+
     }
 
 
 
 
-
+data class state(
+    var loading: Boolean = true,
+    var success : Any?=null,
+    var error : String?=null
+){}
 
 
 

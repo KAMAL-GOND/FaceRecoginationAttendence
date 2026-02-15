@@ -29,7 +29,7 @@ class MainActivity : ComponentActivity() {
         var veiwModel = StudentSideVeiwModel(this)
         enableEdgeToEdge()
         setContent {
-            StudentProfile(14014802323.toLong(),veiwModel)
+            StudentProfile(14014802723.toLong(),veiwModel)
 
             //AddStudentScreen(veiwModel)
             //navApp(veiwModel)
