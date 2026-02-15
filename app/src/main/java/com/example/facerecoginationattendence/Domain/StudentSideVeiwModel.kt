@@ -129,9 +129,9 @@ class StudentSideVeiwModel(appLicationcontext: Context) : ViewModel() {
         }
         return attendence
     }
-    fun getStudentProfile(studentid:Long):Students{
+    fun getStudentProfile(studentid:Long?):Students{
         var SudentProfile : Students?=null
-        viewModelScope.launch { SudentProfile = db.studentDao().GetStudent(studentid) }
+        viewModelScope.launch { SudentProfile = db.studentDao().GetStudent(studentid!!) }
         return SudentProfile!!
     }
 

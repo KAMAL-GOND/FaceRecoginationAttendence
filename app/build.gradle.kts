@@ -78,10 +78,10 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:$nav_version")
     implementation(libs.kotlinx.serialization.json)
     // module-level build.gradle
-        implementation ("io.github.boguszpawlowski.composecalendar:composecalendar:+")
+        implementation ("io.github.boguszpawlowski.composecalendar:composecalendar:1.4.0")
 
         // separate artifact with utilities for working with kotlinx-datetime
-        implementation ("io.github.boguszpawlowski.composecalendar:kotlinx-datetime:+")
+        implementation ("io.github.boguszpawlowski.composecalendar:kotlinx-datetime:1.4.0")
 
 
 

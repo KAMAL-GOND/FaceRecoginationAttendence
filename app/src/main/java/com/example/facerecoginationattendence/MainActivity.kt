@@ -17,6 +17,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.example.facerecoginationattendence.Domain.StudentSideVeiwModel
 import com.example.facerecoginationattendence.Presentation.AddStudentScreen
 import com.example.facerecoginationattendence.Presentation.MarkAttendenceScreen
+import com.example.facerecoginationattendence.Presentation.StudentProfile
 import com.example.facerecoginationattendence.Presentation.navigation.navApp
 import com.example.facerecoginationattendence.ui.theme.FaceRecoginationAttendenceTheme
 
@@ -28,9 +29,10 @@ class MainActivity : ComponentActivity() {
         var veiwModel = StudentSideVeiwModel(this)
         enableEdgeToEdge()
         setContent {
+            StudentProfile(14014802323.toLong(),veiwModel)
 
             //AddStudentScreen(veiwModel)
-            navApp(veiwModel)
+            //navApp(veiwModel)
             //MarkAttendenceScreen(veiwModel)
 //            FaceRecoginationAttendenceTheme {
 //                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
