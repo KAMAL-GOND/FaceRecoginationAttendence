@@ -42,7 +42,7 @@ class StudentSideVeiwModel(appLicationcontext: Context) : ViewModel() {
     val interpreter = MyApp.interpreter
 
 
-//    fun AddStudent(Student : Students ) = viewModelScope.launch(){
+    //    fun AddStudent(Student : Students ) = viewModelScope.launch(){
 //         face_detector(appLicationcontext,Student.imageBitmap!!,).collect {
 //             if(it.isSuccess){
 //                 var croppedImage = it.getOrNull()
@@ -54,123 +54,152 @@ class StudentSideVeiwModel(appLicationcontext: Context) : ViewModel() {
 //        //Student.PhotoEmbedding = getEmbeddingFromBitmap(Student.imageBitmap!!, interpreter)
 //        //Log.d("photoembediing",croppedImage.toString())
 //    }
-    fun AddStudent(student: Students,imageBitmap : Bitmap?) = viewModelScope.launch(Dispatchers.IO) {
-        imageBitmap?.let { bitmap ->
-            // Call face_detector which returns a Flow, and collect the result.
-            // No callback is needed here.
-            Single_face_detector(appLicationcontext, bitmap.copy(Bitmap.Config.ARGB_8888, true)).collect { result ->
-                if (result.isSuccess) {
-                    val croppedImage = result.getOrNull()
-                    if (croppedImage != null) {
-                        // Successfully cropped a face, now generate the embedding.
-                        val embedding = getEmbeddingFromBitmap(croppedImage, interpreter)
-                        val embeddingString = embedding.joinToString(",")
+    fun AddStudent(student: Students, imageBitmap: Bitmap?) =
+        viewModelScope.launch(Dispatchers.IO) {
+            imageBitmap?.let { bitmap ->
+                // Call face_detector which returns a Flow, and collect the result.
+                // No callback is needed here.
+                Single_face_detector(
+                    appLicationcontext,
+                    bitmap.copy(Bitmap.Config.ARGB_8888, true)
+                ).collect { result ->
+                    if (result.isSuccess) {
+                        val croppedImage = result.getOrNull()
+                        if (croppedImage != null) {
+                            // Successfully cropped a face, now generate the embedding.
+                            val embedding = getEmbeddingFromBitmap(croppedImage, interpreter)
+                            val embeddingString = embedding.joinToString(",")
 
-                        // Assign the generated embedding back to the student object.
-                        student.PhotoEmbedding = embedding
-                        db.studentDao().InsertStudent(student)
+                            // Assign the generated embedding back to the student object.
+                            student.PhotoEmbedding = embedding
+                            db.studentDao().InsertStudent(student)
 
-                        Log.d("AddStudent", "Successfully generated embedding: $embeddingString")
+                            Log.d(
+                                "AddStudent",
+                                "Successfully generated embedding: $embeddingString"
+                            )
 
+                        } else {
+                            Log.d(
+                                "AddStudent",
+                                "Face detection ran, but no face was found in the image."
+                            )
+                        }
                     } else {
-                        Log.d("AddStudent", "Face detection ran, but no face was found in the image.")
+                        Log.e("AddStudent", "Face detection failed.", result.exceptionOrNull())
                     }
-                } else {
-                    Log.e("AddStudent", "Face detection failed.", result.exceptionOrNull())
                 }
-            }
-        } ?: Log.e("AddStudent", "Student imageBitmap is null, cannot add student.")
-    }
+            } ?: Log.e("AddStudent", "Student imageBitmap is null, cannot add student.")
+        }
+
     @RequiresApi(Build.VERSION_CODES.O)
-    fun MarkAttendence(Class:String, image : Bitmap)= viewModelScope.launch() {
+    fun MarkAttendence(Class: String, image: Bitmap) = viewModelScope.launch() {
         var StudentList = db.studentDao().GetStudentByClass(Class)
-        var embeddings : ArrayList<String>
-        Multiple_face_detector(appLicationcontext,image).collect{
-            if(it.isSuccess){
-                Log.d("MarkAttendence",it.getOrNull().toString())
+        var embeddings: ArrayList<String>
+        Multiple_face_detector(appLicationcontext, image).collect {
+            if (it.isSuccess) {
+                Log.d("MarkAttendence", it.getOrNull().toString())
 
                 var BitMapArray = it.getOrNull()
-                if (BitMapArray != null){
+                if (BitMapArray != null) {
                     embeddings = ArrayList()
-                    for(bitmap in BitMapArray){
-                        var embedding = getEmbeddingFromBitmap(bitmap,interpreter)
-                        for(student in StudentList){
-                            if(isSamePerson(embedding,student.PhotoEmbedding!!)){
-                                db.attendanceDao().insertAttendance(Attendence(StudentID = student.StudentID, ClassName = Class, Status = true, Date = LocalDate.now().toString()))
+                    for (bitmap in BitMapArray) {
+                        var embedding = getEmbeddingFromBitmap(bitmap, interpreter)
+                        for (student in StudentList) {
+                            if (isSamePerson(embedding, student.PhotoEmbedding!!)) {
+                                db.attendanceDao().insertAttendance(
+                                    Attendence(
+                                        StudentID = student.StudentID,
+                                        ClassName = Class,
+                                        Status = true,
+                                        Date = LocalDate.now().toString()
+                                    )
+                                )
                             }
                         }
-                        Log.d("MarkAttendence",embedding.joinToString(","))
-                        embeddings?.add(embedding.joinToString (","))
+                        Log.d("MarkAttendence", embedding.joinToString(","))
+                        embeddings?.add(embedding.joinToString(","))
 
 
                     }
-                    Log.d("MarkAttendenceaa",embeddings.toString())
+                    Log.d("MarkAttendenceaa", embeddings.toString())
 
+
+                } else {
+                    Log.d("MarkAttendence", "BitMapArray is null")
 
                 }
-                else{
-                    Log.d("MarkAttendence","BitMapArray is null")
-
-                }
-            }
-            else{
-                Log.d("MarkAttendence","no success"+it.exceptionOrNull().toString())
+            } else {
+                Log.d("MarkAttendence", "no success" + it.exceptionOrNull().toString())
 
             }
 
         }
     }
 
-    fun AddClass(Class: Class) = viewModelScope.launch(Dispatchers.IO){
+    fun AddClass(Class: Class) = viewModelScope.launch(Dispatchers.IO) {
         db.classDao().InsertClass(Class);
     }
+
     var getAttendanceFlowState = MutableStateFlow(state()).asStateFlow()
 
-    fun getStudentAttendenceByMonth(studeniId:Long,month:String){
-        var attendence :List<Attendence>?=null
+    fun getStudentAttendenceByMonth(studeniId: Long, month: String) {
+        var attendence: List<Attendence>? = null
         viewModelScope.launch {
-            try{
-                attendence =db.attendanceDao().getMonthlyAttendance(studeniId,month)
-                if(attendence!=null){
+            try {
+                attendence = db.attendanceDao().getMonthlyAttendance(studeniId, month)
+                if (attendence != null) {
                     getAttendanceFlowState.value.success = attendence
-                }
-                else{
-                    getAttendanceFlowState.value.error= "null error"
+                } else {
+                    getAttendanceFlowState.value.error = "null error"
                 }
 
 
-            }
-            catch (e:Exception){
-                getAttendanceFlowState.value.error=e.toString()
+            } catch (e: Exception) {
+                getAttendanceFlowState.value.error = e.toString()
             }
 
         }
 
     }
+
     var getStudentPrfofileState = MutableStateFlow(state()).asStateFlow()
-    fun getStudentProfile(studentid:Long?){
-        if(studentid==null){
-            getStudentPrfofileState.value.error=null
-        }
-        else{
-            var SudentProfile : Students?=null
+    fun getStudentProfile(studentid: Long?) {
+        if (studentid == null) {
+            getStudentPrfofileState.value.error = null
+        } else {
+            var SudentProfile: Students? = null
 
             viewModelScope.launch {
-                try{
+                try {
                     SudentProfile = db.studentDao().GetStudent(studentid)
-                    getStudentPrfofileState.value.success=SudentProfile
+                    getStudentPrfofileState.value.success = SudentProfile
+                } catch (e: Exception) {
+                    getAttendanceFlowState.value.error = e.toString()
                 }
-                catch (e: Exception){
-                    getAttendanceFlowState.value.error=e.toString()
-                }
-                 }
+            }
 
         }
 
     }
 
+    var getClassDayAttendence = MutableStateFlow(state())
+    var  getClassDayAttendenceState= getClassDayAttendence.asStateFlow()
+
+    fun getClassDayAttendence(group : String,date : String) = viewModelScope.launch {
+        try {
+           var attendence = db.attendanceDao().getClassAttendanceForDay(group,date)
+            getClassDayAttendence.value = state(false,attendence as List<Attendence>,null)
+
+        }
+        catch (e : Exception){
+            getClassDayAttendence.value= state(false,null,e.toString())
+        }
+
+    }
 
 
+}
 
 data class state(
     var loading: Boolean = true,
@@ -191,7 +220,7 @@ data class state(
 
 
 
-}
+
 
 
 
