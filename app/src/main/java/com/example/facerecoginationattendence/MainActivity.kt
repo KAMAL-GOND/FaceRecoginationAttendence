@@ -29,10 +29,10 @@ class MainActivity : ComponentActivity() {
         var veiwModel = StudentSideVeiwModel(this)
         enableEdgeToEdge()
         setContent {
-            StudentProfile(14014802723.toLong(),veiwModel)
+            //StudentProfile(14014802723.toLong(),veiwModel)
 
             //AddStudentScreen(veiwModel)
-            //navApp(veiwModel)
+            navApp(veiwModel)
             //MarkAttendenceScreen(veiwModel)
 //            FaceRecoginationAttendenceTheme {
 //                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
