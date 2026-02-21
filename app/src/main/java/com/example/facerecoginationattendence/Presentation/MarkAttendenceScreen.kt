@@ -50,10 +50,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.navigation.NavController
 import com.example.facerecoginationattendence.Data.LocalDatabase.AppDatabase
 import com.example.facerecoginationattendence.Data.LocalDatabase.Class
 
 import com.example.facerecoginationattendence.Domain.StudentSideVeiwModel
+import com.example.facerecoginationattendence.Presentation.navigation.Routes
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
@@ -63,7 +65,7 @@ import kotlin.coroutines.CoroutineContext
 
 @RequiresApi(Build.VERSION_CODES.R)
 @Composable
-fun MarkAttendenceScreen(veiwModel: StudentSideVeiwModel) {
+fun MarkAttendenceScreen(veiwModel: StudentSideVeiwModel,navController: NavController) {
     //dropdown menu
     var dropDownMenuExpansion by remember { mutableStateOf(false) }
     // db class
@@ -223,6 +225,8 @@ fun MarkAttendenceScreen(veiwModel: StudentSideVeiwModel) {
                         Class = Class,
                         image = imageBitmapState.value!!
                     )
+                    veiwModel.getClassDayAttendence(Class.toString(), LocalDate.now().toString())
+                    navController.navigate(Routes.StudentPresent)
                 }) {
                     Text(text = "Mark Attendence")
                 }

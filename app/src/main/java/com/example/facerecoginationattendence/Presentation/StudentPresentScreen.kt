@@ -1,6 +1,7 @@
 package com.example.facerecoginationattendence.Presentation
 
 import android.widget.Toast
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,16 +22,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.facerecoginationattendence.Data.LocalDatabase.Attendence
 import com.example.facerecoginationattendence.Data.LocalDatabase.Class
 import com.example.facerecoginationattendence.Data.LocalDatabase.Students
 import com.example.facerecoginationattendence.Domain.StudentSideVeiwModel
+import com.example.facerecoginationattendence.Presentation.navigation.Routes
 
 @Composable
-fun StudentPresentScreen(veiwModel: StudentSideVeiwModel,group : String,date: String) {
-    LaunchedEffect(keys = arrayOf(Unit)) {
-        veiwModel.getClassDayAttendence(group, date)
-    }
+fun StudentPresentScreen(veiwModel: StudentSideVeiwModel,navController: NavController) {
+
+
+
     var state = veiwModel.getClassDayAttendenceState.collectAsState()
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -59,7 +62,9 @@ fun StudentPresentScreen(veiwModel: StudentSideVeiwModel,group : String,date: St
 
             state.value.success != null -> LazyColumn() {
                 items(state.value.success as List<Attendence>) { item ->
-                    Row(modifier = Modifier.fillMaxWidth().height(15.dp)) {
+                    Row(modifier = Modifier.fillMaxWidth().height(15.dp).clickable(onClick = {
+                        navController.navigate(Routes.StudentProfile(item.StudentID))
+                    })) {
                         Box(
                             modifier = Modifier.fillMaxHeight().fillMaxWidth(0.3f)
                         ) { Text(item.StudentID.toString()) }

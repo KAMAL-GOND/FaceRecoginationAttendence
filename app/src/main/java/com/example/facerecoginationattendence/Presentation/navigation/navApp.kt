@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,6 +20,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -55,11 +57,14 @@ import androidx.compose.ui.window.Dialog
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import com.example.facerecoginationattendence.Data.LocalDatabase.AppDatabase
 import com.example.facerecoginationattendence.Data.LocalDatabase.Class
 import com.example.facerecoginationattendence.Domain.StudentSideVeiwModel
 import com.example.facerecoginationattendence.Presentation.AddStudentScreen
 import com.example.facerecoginationattendence.Presentation.MarkAttendenceScreen
+import com.example.facerecoginationattendence.Presentation.StudentPresentScreen
+import com.example.facerecoginationattendence.Presentation.StudentProfile
 import io.github.boguszpawlowski.composecalendar.SelectableCalendar
 import io.github.boguszpawlowski.composecalendar.kotlinxDateTime.now
 import io.github.boguszpawlowski.composecalendar.selection.EmptySelectionState.onDateSelected
@@ -92,6 +97,8 @@ fun navApp(veiwModel: StudentSideVeiwModel) {
 
     var classpicked by remember { mutableStateOf<String?>(null) }
 
+    var search by remember { mutableStateOf<String>("")  }
+
 
 
     LaunchedEffect(Unit) {
@@ -99,8 +106,22 @@ fun navApp(veiwModel: StudentSideVeiwModel) {
     }
 
     ModalNavigationDrawer(
+        modifier = Modifier.fillMaxWidth(),
         drawerContent = {ModalDrawerSheet() {
+            Spacer(modifier = Modifier.height(10.dp))
+
+            OutlinedTextField(
+                value = search,
+                onValueChange = {search = it},
+                label = {Text("enrollment number")},
+                trailingIcon = {Icon(Icons.Default.Search,"", modifier = Modifier.clickable(onClick = {
+                    navController.navigate(Routes.StudentProfile(search.toLong()))
+                }))},
+
+
+            )
             LazyColumn(){
+
                 classes.forEach { it->
                     item{
                         Text(it.ClassName.toString()+"->"+it.TeachersName.toString(), modifier = Modifier.clickable(onClick = {
@@ -162,9 +183,10 @@ fun navApp(veiwModel: StudentSideVeiwModel) {
             DatePickerDialog(
                 {expanded = false}, {
                     TextButton(onClick = {
-                        veiwModel.getClassDayAttendence(classpicked.toString(),millisToDateString(datePickerState.selectedDateMillis!!))
+                        veiwModel.getClassDayAttendence(classpicked.toString(),millisToDateString(datePickerState.selectedDateMillis!! ))
 
                         expanded = false
+                        navController.navigate(Routes.StudentPresent)
                     }) {
                         Text("OK")
                     }
@@ -210,11 +232,22 @@ fun navApp(veiwModel: StudentSideVeiwModel) {
         NavHost(navController=navController, startDestination = Routes.MarkAttendence){
 
             composable <Routes.MarkAttendence>{
-                MarkAttendenceScreen(veiwModel)
+                MarkAttendenceScreen(veiwModel,navController)
             }
             composable <Routes.AddStudent>{
                 AddStudentScreen(veiwModel)
             }
+
+            composable<Routes.StudentProfile> {
+                var id = it.toRoute<Routes.StudentProfile>()
+                StudentProfile(id.id,veiwModel)
+            }
+
+            composable<Routes.StudentPresent>{
+                StudentPresentScreen(veiwModel,navController)
+            }
+
+
         }
     }}
 }

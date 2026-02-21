@@ -11,4 +11,11 @@ sealed class Routes {
     @Serializable
     object AddStudent : Routes()
 
+    @Serializable
+    data class StudentProfile(var id :Long) : Routes()
+
+    @Serializable
+    object StudentPresent : Routes()
+
+
 }
