@@ -21,7 +21,7 @@ class MyApp : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        // Create interpreter ONCE for the whole app
+
         interpreter = Interpreter(loadModelFile(MODEL_NAME))
 
 
