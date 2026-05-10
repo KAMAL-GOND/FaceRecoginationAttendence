@@ -27,6 +27,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DatePickerState
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -41,18 +42,26 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -69,6 +78,7 @@ import io.github.boguszpawlowski.composecalendar.SelectableCalendar
 import io.github.boguszpawlowski.composecalendar.kotlinxDateTime.now
 import io.github.boguszpawlowski.composecalendar.selection.EmptySelectionState.onDateSelected
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 import kotlinx.datetime.LocalDate
@@ -98,8 +108,8 @@ fun navApp(veiwModel: StudentSideVeiwModel) {
     var classpicked by remember { mutableStateOf<String?>(null) }
 
     var search by remember { mutableStateOf<String>("")  }
-
-
+    var drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    var scope = rememberCoroutineScope ();
 
     LaunchedEffect(Unit) {
         classes = withContext(Dispatchers.IO) { db.classDao().GetAllClass() }
@@ -107,29 +117,45 @@ fun navApp(veiwModel: StudentSideVeiwModel) {
 
     ModalNavigationDrawer(
         modifier = Modifier.fillMaxWidth(),
-        drawerContent = {ModalDrawerSheet() {
+        drawerState = drawerState,
+
+        drawerContent = {ModalDrawerSheet(Modifier.fillMaxWidth(0.7f)) {
             Spacer(modifier = Modifier.height(10.dp))
 
             OutlinedTextField(
                 value = search,
                 onValueChange = {search = it},
                 label = {Text("enrollment number")},
+                placeholder = {Text("enrollment number")},
+                //visualTransformation = visu,
+
                 trailingIcon = {Icon(Icons.Default.Search,"", modifier = Modifier.clickable(onClick = {
+                    scope.launch {  drawerState.close() }
                     navController.navigate(Routes.StudentProfile(search.toLong()))
+
                 }))},
 
 
             )
+            Spacer(modifier = Modifier.height(10.dp))
             LazyColumn(){
+
 
                 classes.forEach { it->
                     item{
-                        Text(it.ClassName.toString()+"->"+it.TeachersName.toString(), modifier = Modifier.clickable(onClick = {
+                        ModalNavigationItem(it , {
                             classpicked = it.ClassName
-                            expanded = true
+                            expanded=true;
 
 
-                        }))
+                        })
+//                        Text(it.ClassName.toString()+"->"+it.TeachersName.toString(), modifier = Modifier.clickable(onClick = {
+//                            classpicked = it.ClassName
+//                            //navController.navigate(Routes.StudentProfile(it.)
+//                            expanded = true;
+//
+//
+//                        }))
                         HorizontalDivider(thickness = 2.dp)
                     }
 
@@ -186,6 +212,7 @@ fun navApp(veiwModel: StudentSideVeiwModel) {
                         veiwModel.getClassDayAttendence(classpicked.toString(),millisToDateString(datePickerState.selectedDateMillis!! ))
 
                         expanded = false
+                        scope.launch { drawerState.close() }
                         navController.navigate(Routes.StudentPresent)
                     }) {
                         Text("OK")
@@ -260,3 +287,11 @@ fun millisToDateString(millis: Long): String {
 }
 
 
+
+@Composable
+fun ModalNavigationItem(it : Class , onclick:() -> Unit){
+    Column(modifier = Modifier.fillMaxWidth().clickable(onClick =   onclick , )) {
+        Text(text ="Teacher :${it.TeachersName}", fontStyle = FontStyle.Italic , fontSize = 20.sp , fontWeight = FontWeight.W400)
+        Text(text ="class :${it.ClassName}", fontStyle = FontStyle.Italic , fontSize = 20.sp , fontWeight = FontWeight.W400)
+    }
+}
