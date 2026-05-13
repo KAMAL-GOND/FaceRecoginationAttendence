@@ -122,6 +122,8 @@ class StudentSideVeiwModel(appLicationcontext: Context) : ViewModel() {
 
 
                     }
+                    getClassDayAttendence(Class.toString(), LocalDate.now().toString())
+
                     Log.d("MarkAttendenceaa", embeddings.toString())
 
 
@@ -196,6 +198,22 @@ class StudentSideVeiwModel(appLicationcontext: Context) : ViewModel() {
             getClassDayAttendence.value= state(false,null,e.toString())
         }
 
+    }
+    fun getStudentName(id: Long) : String? {
+        var name: String? = null
+        viewModelScope.launch {
+        try{
+             name = db.studentDao().GetStudent(id).name
+
+
+        }
+        catch(e: Exception){
+            name = null;
+
+        }
+
+    }
+    return name;
     }
 
 

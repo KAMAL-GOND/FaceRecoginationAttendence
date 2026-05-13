@@ -225,7 +225,7 @@ fun MarkAttendenceScreen(veiwModel: StudentSideVeiwModel,navController: NavContr
                         Class = Class,
                         image = imageBitmapState.value!!
                     )
-                    veiwModel.getClassDayAttendence(Class.toString(), LocalDate.now().toString())
+
                     navController.navigate(Routes.StudentPresent)
                 }) {
                     Text(text = "Mark Attendence")

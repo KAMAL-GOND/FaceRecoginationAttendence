@@ -15,12 +15,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -85,14 +87,15 @@ fun StudentProfile(studentId: Long,veiwModel: StudentSideVeiwModel) {
 
     Column(modifier = Modifier.fillMaxSize().padding(5.dp)) {
         Row(modifier = Modifier.fillMaxWidth().fillMaxHeight(0.3f).padding(7.dp), horizontalArrangement = Arrangement.Center){
-            Box(modifier = Modifier.fillMaxHeight().fillMaxWidth(0.3f).clip(CircleShape).border(width = 2.dp, color = Color.Black,CircleShape)){
-                Icon(Icons.Default.Person,null)
+            Box(modifier = Modifier.fillMaxSize(0.5f).clip(CircleShape).border(width = 2.dp, color = Color.Black,CircleShape), contentAlignment = Alignment.Center){
+              //  Icon(Icons.Default.Person,null)
+                Icon(Icons.Rounded.Person,null, modifier = Modifier.fillMaxSize())
             }
             Spacer(Modifier.width(5.dp))
             Column(modifier = Modifier.fillMaxHeight().padding(5.dp)){
                 Text((StudentProfile.value.success as Students).name.toString())
-                Text((StudentProfile.value.success as Students).name.toString())
-                Text((StudentProfile.value.success as Students).name.toString())
+                Text((StudentProfile.value.success as Students).Class.toString())
+                Text((StudentProfile.value.success as Students).StudentID.toString())
             }
             Spacer(Modifier.width(10.dp))
             var attendencePercentage = (MonthAttendenceList.value.size/calendarState.monthState.currentMonth.lengthOfMonth())*100
