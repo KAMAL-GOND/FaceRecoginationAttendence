@@ -14,60 +14,75 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+
+      # Checkout Repository
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           persist-credentials: true
 
+      # Setup Java 17
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
           java-version: 17
-          distribution: 'temurin'
+          distribution: temurin
 
+      # Setup Android SDK
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Make gradlew executable
-        run: chmod +x ./gradlew
+      # Make gradlew executable
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
 
-      # Decode JKS file from GitHub Secrets
+      # Decode Release Keystore
       - name: Decode Keystore
         run: |
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > app/release.jks
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > release.jks
 
-      # Build signed release APK
+      # Build Release APK
       - name: Build Release APK
         run: ./gradlew assembleRelease
         env:
-          KEYSTORE_PATH: app/release.jks
+          KEYSTORE_PATH: release.jks
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
 
+      # Extract Version Info
       - name: Extract Version Info
         id: version
         run: |
           VERSION_NAME=$(grep 'versionName' app/build.gradle.kts | grep -oP '"\K[^"]+' || echo "1.0")
           VERSION_CODE=$(grep 'versionCode' app/build.gradle.kts | grep -oP '= \K[0-9]+' || echo "1")
+
           BUILD_DATE=$(date '+%Y%m%d_%H%M%S')
+
+          APK_FILENAME="FaceRecognition_v${VERSION_NAME}_${BUILD_DATE}.apk"
 
           echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_OUTPUT
           echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_OUTPUT
           echo "BUILD_DATE=$BUILD_DATE" >> $GITHUB_OUTPUT
-          echo "APK_FILENAME=FaceRecognition_v${VERSION_NAME}_${BUILD_DATE}.apk" >> $GITHUB_OUTPUT
+          echo "APK_FILENAME=$APK_FILENAME" >> $GITHUB_OUTPUT
 
+      # Create versions folder
       - name: Create versions directory
         run: mkdir -p versions
 
+      # Copy APK
       - name: Copy APK to versions folder
         run: |
-          APK_SOURCE=$(find app/build/outputs/apk/release -name "*.apk" -type f)
-          APK_DEST="versions/${{ steps.version.outputs.APK_FILENAME }}"
-          cp "$APK_SOURCE" "$APK_DEST"
-          echo "APK built: $APK_DEST"
+          APK_SOURCE=$(find app/build/outputs/apk/release -name "*.apk" -type f | head -n 1)
 
-      - name: Commit and push APK
+          APK_DEST="versions/${{ steps.version.outputs.APK_FILENAME }}"
+
+          cp "$APK_SOURCE" "$APK_DEST"
+
+          echo "APK copied to $APK_DEST"
+
+      # Commit APK
+      - name: Commit APK
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
@@ -78,30 +93,43 @@ jobs:
 
           git push
 
+      # Create GitHub Release
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.version.outputs.VERSION_NAME }}-${{ steps.version.outputs.BUILD_DATE }}
+
           name: Face Recognition v${{ steps.version.outputs.VERSION_NAME }}
+
           body: |
-            ## Release Notes
+            ## Release Information
 
             Version: ${{ steps.version.outputs.VERSION_NAME }}
             Build Code: ${{ steps.version.outputs.VERSION_CODE }}
-            Built: ${{ steps.version.outputs.BUILD_DATE }}
+            Build Date: ${{ steps.version.outputs.BUILD_DATE }}
 
             ### Features
-            - Face Recognition using ML Kit
+            - Face Recognition with ML Kit
+            - TensorFlow Lite Integration
             - Attendance Tracking
-            - TensorFlow Lite
+            - Room Database
             - Jetpack Compose UI
 
+            ### Build Type
+            - Release Signed APK
+            - Minification Enabled
+            - Resource Shrinking Enabled
+
           files: versions/${{ steps.version.outputs.APK_FILENAME }}
+
+          draft: false
+          prerelease: false
 
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload APK as artifact
+      # Upload APK Artifact
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: release-apk
