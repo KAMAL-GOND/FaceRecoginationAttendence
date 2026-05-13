@@ -6,6 +6,9 @@ on:
       - master
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -13,6 +16,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          persist-credentials: true
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -26,28 +31,34 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
+      # Decode JKS file from GitHub Secrets
+      - name: Decode Keystore
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > app/release.jks
+
+      # Build signed release APK
       - name: Build Release APK
         run: ./gradlew assembleRelease
         env:
-          KEYSTORE_PATH: /home/runner/work/FaceRecoginationAttendence/FaceRecoginationAttendence/debug.keystore
-          KEYSTORE_PASSWORD: android
-          KEY_ALIAS: androiddebugkey
-          KEY_PASSWORD: android
+          KEYSTORE_PATH: app/release.jks
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
 
       - name: Extract Version Info
         id: version
         run: |
-          VERSION_NAME=$(grep 'versionName' app/build.gradle.kts | grep -oP '"\K[^"]+' || echo "unknown")
+          VERSION_NAME=$(grep 'versionName' app/build.gradle.kts | grep -oP '"\K[^"]+' || echo "1.0")
           VERSION_CODE=$(grep 'versionCode' app/build.gradle.kts | grep -oP '= \K[0-9]+' || echo "1")
           BUILD_DATE=$(date '+%Y%m%d_%H%M%S')
+
           echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_OUTPUT
           echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_OUTPUT
           echo "BUILD_DATE=$BUILD_DATE" >> $GITHUB_OUTPUT
           echo "APK_FILENAME=FaceRecognition_v${VERSION_NAME}_${BUILD_DATE}.apk" >> $GITHUB_OUTPUT
 
       - name: Create versions directory
-        run: |
-          mkdir -p versions
+        run: mkdir -p versions
 
       - name: Copy APK to versions folder
         run: |
@@ -60,8 +71,11 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
+
           git add versions/
+
           git commit -m "Build: Release APK v${{ steps.version.outputs.VERSION_NAME }} - ${{ steps.version.outputs.BUILD_DATE }}" || echo "No changes to commit"
+
           git push
 
       - name: Create GitHub Release
@@ -71,24 +85,19 @@ jobs:
           name: Face Recognition v${{ steps.version.outputs.VERSION_NAME }}
           body: |
             ## Release Notes
-            **Version:** ${{ steps.version.outputs.VERSION_NAME }}
-            **Build Code:** ${{ steps.version.outputs.VERSION_CODE }}
-            **Built:** ${{ steps.version.outputs.BUILD_DATE }}
-            
-            ### Build Configuration
-            - ✅ Minification Enabled (ProGuard)
-            - ✅ Resource Shrinking Enabled
-            - ✅ Release Signed Build
-            - ✅ Production Ready
-            
+
+            Version: ${{ steps.version.outputs.VERSION_NAME }}
+            Build Code: ${{ steps.version.outputs.VERSION_CODE }}
+            Built: ${{ steps.version.outputs.BUILD_DATE }}
+
             ### Features
             - Face Recognition using ML Kit
-            - Attendance Tracking with Room Database
+            - Attendance Tracking
+            - TensorFlow Lite
             - Jetpack Compose UI
-            - TensorFlow Lite Integration
+
           files: versions/${{ steps.version.outputs.APK_FILENAME }}
-          draft: false
-          prerelease: false
+
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

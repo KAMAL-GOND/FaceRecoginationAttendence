@@ -23,31 +23,58 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("release") {
+
+            val keystorePath = System.getenv("KEYSTORE_PATH")
+                ?: "${System.getProperty("user.home")}/.android/debug.keystore"
+
+            storeFile = file(keystorePath)
+
+            storePassword = System.getenv("KEYSTORE_PASSWORD") ?: "android"
+
+            keyAlias = System.getenv("KEY_ALIAS") ?: "androiddebugkey"
+
+            keyPassword = System.getenv("KEY_PASSWORD") ?: "android"
+        }
+    }
+
     buildTypes {
+
         release {
-            isMinifyEnabled = false;
+
+            signingConfig = signingConfigs.getByName("release")
+
+            isMinifyEnabled = true
+            isShrinkResources = true
+
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            signingConfig = signingConfigs.getByName("debug")
+        }
+
+        debug {
+            isMinifyEnabled = false
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+
     kotlinOptions {
         jvmTarget = "11"
     }
+
     buildFeatures {
         compose = true
-
-        aaptOptions {
-            noCompress ("tflite")
-        }
     }
 
+    androidResources {
+        noCompress += "tflite"
+    }
 }
 
 dependencies {
