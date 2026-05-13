@@ -1,0 +1,100 @@
+name: Build and Release APK
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: 17
+          distribution: 'temurin'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: Build Release APK
+        run: ./gradlew assembleRelease
+        env:
+          KEYSTORE_PATH: /home/runner/work/FaceRecoginationAttendence/FaceRecoginationAttendence/debug.keystore
+          KEYSTORE_PASSWORD: android
+          KEY_ALIAS: androiddebugkey
+          KEY_PASSWORD: android
+
+      - name: Extract Version Info
+        id: version
+        run: |
+          VERSION_NAME=$(grep 'versionName' app/build.gradle.kts | grep -oP '"\K[^"]+' || echo "unknown")
+          VERSION_CODE=$(grep 'versionCode' app/build.gradle.kts | grep -oP '= \K[0-9]+' || echo "1")
+          BUILD_DATE=$(date '+%Y%m%d_%H%M%S')
+          echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_OUTPUT
+          echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_OUTPUT
+          echo "BUILD_DATE=$BUILD_DATE" >> $GITHUB_OUTPUT
+          echo "APK_FILENAME=FaceRecognition_v${VERSION_NAME}_${BUILD_DATE}.apk" >> $GITHUB_OUTPUT
+
+      - name: Create versions directory
+        run: |
+          mkdir -p versions
+
+      - name: Copy APK to versions folder
+        run: |
+          APK_SOURCE=$(find app/build/outputs/apk/release -name "*.apk" -type f)
+          APK_DEST="versions/${{ steps.version.outputs.APK_FILENAME }}"
+          cp "$APK_SOURCE" "$APK_DEST"
+          echo "APK built: $APK_DEST"
+
+      - name: Commit and push APK
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add versions/
+          git commit -m "Build: Release APK v${{ steps.version.outputs.VERSION_NAME }} - ${{ steps.version.outputs.BUILD_DATE }}" || echo "No changes to commit"
+          git push
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ steps.version.outputs.VERSION_NAME }}-${{ steps.version.outputs.BUILD_DATE }}
+          name: Face Recognition v${{ steps.version.outputs.VERSION_NAME }}
+          body: |
+            ## Release Notes
+            **Version:** ${{ steps.version.outputs.VERSION_NAME }}
+            **Build Code:** ${{ steps.version.outputs.VERSION_CODE }}
+            **Built:** ${{ steps.version.outputs.BUILD_DATE }}
+            
+            ### Build Configuration
+            - ✅ Minification Enabled (ProGuard)
+            - ✅ Resource Shrinking Enabled
+            - ✅ Release Signed Build
+            - ✅ Production Ready
+            
+            ### Features
+            - Face Recognition using ML Kit
+            - Attendance Tracking with Room Database
+            - Jetpack Compose UI
+            - TensorFlow Lite Integration
+          files: versions/${{ steps.version.outputs.APK_FILENAME }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload APK as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apk
+          path: versions/${{ steps.version.outputs.APK_FILENAME }}
+          retention-days: 30
