@@ -122,7 +122,7 @@ fun StudentPresentScreen(veiwModel: StudentSideVeiwModel,navController: NavContr
                    Box(modifier = Modifier
                        .fillMaxWidth(0.4f)
                        .fillMaxHeight()) {
-                       Text("Name")
+                       Text("Date")
                    }
 
                    Box(modifier = Modifier
@@ -157,15 +157,13 @@ fun StudentPresentScreen(veiwModel: StudentSideVeiwModel,navController: NavContr
                            Box(modifier = Modifier
                                .fillMaxWidth(0.3f)
                                .fillMaxHeight()) { Text(item.StudentID.toString()) }
-                           var name  = veiwModel.getStudentName(item.StudentID)
+                           //var name  = veiwModel.getStudentName(item.StudentID)
                            Box(modifier = Modifier
                                .fillMaxWidth(0.4f)
-                               .fillMaxHeight()) { if(name!=null){
-                               Text(name.toString())
+                               .fillMaxHeight()) {
+                               Text(item.Date.toString())
+
                            }
-                           else{
-                               Text("null")
-                           }}
                            Box(modifier = Modifier
                                .fillMaxWidth(0.3f)
                                .fillMaxHeight()) { Text(item.ClassName.toString()) }
