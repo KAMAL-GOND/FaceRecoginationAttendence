@@ -54,8 +54,12 @@ class StudentSideVeiwModel(appLicationcontext: Context) : ViewModel() {
 //        //Student.PhotoEmbedding = getEmbeddingFromBitmap(Student.imageBitmap!!, interpreter)
 //        //Log.d("photoembediing",croppedImage.toString())
 //    }
+    private var AddStudentSuccess = MutableStateFlow<String?>(null);
+    var AddStudentSuccessFLow = AddStudentSuccess.asStateFlow();
+
     fun AddStudent(student: Students, imageBitmap: Bitmap?) =
         viewModelScope.launch(Dispatchers.IO) {
+            try{
             imageBitmap?.let { bitmap ->
                 // Call face_detector which returns a Flow, and collect the result.
                 // No callback is needed here.
@@ -78,22 +82,42 @@ class StudentSideVeiwModel(appLicationcontext: Context) : ViewModel() {
                                 "AddStudent",
                                 "Successfully generated embedding: $embeddingString"
                             )
+                            AddStudentSuccess.value= "Student Added "
 
                         } else {
                             Log.d(
                                 "AddStudent",
                                 "Face detection ran, but no face was found in the image."
+
                             )
+                            AddStudentSuccess.value="No Face Found"
                         }
                     } else {
                         Log.e("AddStudent", "Face detection failed.", result.exceptionOrNull())
+
+                        AddStudentSuccess.value = "Face Detaection failed"
                     }
                 }
             } ?: Log.e("AddStudent", "Student imageBitmap is null, cannot add student.")
         }
+        catch (e: Exception){
+
+
+            AddStudentSuccess.value = "Error occured while adding face"
+
+
+        }
+        }
+
+    fun resetAddStudentSuccessValue(){
+        AddStudentSuccess.value=null;
+    }
+
+    private var MarkAttendenceSuccess = MutableStateFlow<String?>(null);
+    var MarkAttendenceFLow = AddStudentSuccess.asStateFlow();
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun MarkAttendence(Class: String, image: Bitmap) = viewModelScope.launch() {
+    fun MarkAttendence(Class: String, image: Bitmap) = viewModelScope.launch() {try{
         var StudentList = db.studentDao().GetStudentByClass(Class)
         var embeddings: ArrayList<String>
         Multiple_face_detector(appLicationcontext, image).collect {
@@ -124,20 +148,34 @@ class StudentSideVeiwModel(appLicationcontext: Context) : ViewModel() {
                     }
                     getClassDayAttendence(Class.toString(), LocalDate.now().toString())
 
+                    MarkAttendenceSuccess.value = "Attendence Marked"
+
                     Log.d("MarkAttendenceaa", embeddings.toString())
 
 
                 } else {
                     Log.d("MarkAttendence", "BitMapArray is null")
+                    MarkAttendenceSuccess.value="No Face datected"
 
                 }
             } else {
                 Log.d("MarkAttendence", "no success" + it.exceptionOrNull().toString())
+                MarkAttendenceSuccess.value="Marking Attendence Failed"
 
             }
 
         }
     }
+    catch (e: Exception){
+        MarkAttendenceSuccess.value = "Error in attendence mark"
+    }
+
+    }
+
+    fun resetMarkattendenceValue(){
+        MarkAttendenceSuccess.value = null;
+    }
+
 
     fun AddClass(Class: Class) = viewModelScope.launch(Dispatchers.IO) {
         db.classDao().InsertClass(Class);

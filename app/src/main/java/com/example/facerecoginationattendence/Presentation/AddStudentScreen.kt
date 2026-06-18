@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
@@ -28,6 +29,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,11 +41,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.example.facerecoginationattendence.Data.LocalDatabase.AppDatabase
 import com.example.facerecoginationattendence.Data.LocalDatabase.Students
 
 import com.example.facerecoginationattendence.Domain.StudentSideVeiwModel
+import com.example.facerecoginationattendence.Presentation.navigation.Routes
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
@@ -67,6 +71,14 @@ fun AddStudentScreen(veiwModel: StudentSideVeiwModel){
     var name by remember { mutableStateOf("") }
     var rollNo by remember { mutableStateOf("") }
     var ClassName by remember { mutableStateOf("") }
+
+    var AddStudentStatus =  veiwModel.AddStudentSuccessFLow.collectAsState();
+    if(
+        AddStudentStatus.value!=null
+    ){
+        Toast.makeText(LocalContext.current,AddStudentStatus.value.toString(),Toast.LENGTH_LONG).show()
+        veiwModel.resetAddStudentSuccessValue();
+    }
 
     // FUNCTION TO PASS FOR MAKING SHOW POHTOTO MANAGER TRUE SO THAT AGAIN , IT DONT REMAIN TRUE WHEN  BOTTOM SHEET IS CLOSSE , FOR MAKING NEXT ATTEMPT TO SHOW PHOTO MANAGER
 
@@ -133,7 +145,7 @@ fun AddStudentScreen(veiwModel: StudentSideVeiwModel){
         Spacer(modifier = Modifier.height(16.dp))
         OutlinedTextField(value = name, onValueChange = {name = it}, label = { Text(text = "Student Name")})
         Spacer(modifier = Modifier.height(16.dp))
-        OutlinedTextField(value = rollNo, onValueChange = {rollNo = it}, label = { Text(text = "Roll No")})
+        OutlinedTextField(value = rollNo, onValueChange = {rollNo = it.toString()}, label = { Text(text = "Roll No")}, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
         Spacer(modifier = Modifier.height(16.dp))
         Box {
             OutlinedTextField(

@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Person
@@ -58,6 +59,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
@@ -98,7 +100,7 @@ fun navApp(veiwModel: StudentSideVeiwModel) {
     var navController = rememberNavController()
     //var backStackEntry : = remember{mutableListOf().toMutableStateList()}
     var selectedItem by remember { mutableIntStateOf(0) }
-    var BottomNavItem = listOf("Mark_Attendence","Add_Student")
+    var BottomNavItem = listOf("Mark Attendence","Add Student")
     val db = AppDatabase.getDatabase(veiwModel.appLicationcontext)
     var classes by remember { mutableStateOf<List<Class>>(emptyList()) }
 
@@ -124,10 +126,11 @@ fun navApp(veiwModel: StudentSideVeiwModel) {
 
             OutlinedTextField(
                 value = search,
-                onValueChange = {search = it},
+                onValueChange = {search = it.toString()},
                 label = {Text("enrollment number")},
                 placeholder = {Text("enrollment number")},
                 //visualTransformation = visu,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
 
                 trailingIcon = {Icon(Icons.Default.Search,"", modifier = Modifier.clickable(onClick = {
                     scope.launch {  drawerState.close() }

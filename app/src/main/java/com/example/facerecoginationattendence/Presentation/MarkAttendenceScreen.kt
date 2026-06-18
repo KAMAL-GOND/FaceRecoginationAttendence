@@ -50,6 +50,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.facerecoginationattendence.Data.LocalDatabase.AppDatabase
 import com.example.facerecoginationattendence.Data.LocalDatabase.Class
@@ -80,6 +81,12 @@ fun MarkAttendenceScreen(veiwModel: StudentSideVeiwModel,navController: NavContr
 
     val imageBitmapState = remember { mutableStateOf<Bitmap?>(null) }
     val context = LocalContext.current
+    var MarkAttendenceStatus = veiwModel.MarkAttendenceFLow.collectAsStateWithLifecycle()
+
+    if(MarkAttendenceStatus.value!=null){
+        Toast.makeText(LocalContext.current, MarkAttendenceStatus.value.toString(),Toast.LENGTH_LONG).show()
+        veiwModel.resetMarkattendenceValue()
+    }
 
 
     var Class by remember { mutableStateOf("") }
